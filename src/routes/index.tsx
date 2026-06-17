@@ -1,29 +1,250 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { PageHeader } from "@/components/page-header";
+import { StatusBadge } from "@/components/status-badge";
+import { leads, formatAED } from "@/lib/mock-data";
+import {
+  Users,
+  Flame,
+  CalendarCheck2,
+  Trophy,
+  ArrowUpRight,
+  ArrowDownRight,
+  Download,
+  Plus,
+} from "lucide-react";
+import {
+  ResponsiveContainer,
+  AreaChart,
+  Area,
+  XAxis,
+  YAxis,
+  Tooltip,
+  CartesianGrid,
+} from "recharts";
+import { monthlyPerformance } from "@/lib/mock-data";
 
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Your App" },
-      { name: "description", content: "Replace this with a one-sentence description of your app." },
-      { property: "og:title", content: "Your App" },
-      { property: "og:description", content: "Replace this with a one-sentence description of your app." },
+      { title: "Dashboard — Mirage Realty" },
+      { name: "description", content: "Real-time overview of leads, pipeline, and deals." },
     ],
   }),
-  component: Index,
+  component: Dashboard,
 });
 
-// IMPORTANT: Replace this placeholder. See ./README.md for routing conventions.
-function Index() {
+function KpiCard({
+  label,
+  value,
+  delta,
+  positive = true,
+  icon: Icon,
+  tone,
+}: {
+  label: string;
+  value: string;
+  delta: string;
+  positive?: boolean;
+  icon: React.ComponentType<{ className?: string }>;
+  tone: "primary" | "hot" | "gold" | "success";
+}) {
+  const toneMap = {
+    primary: "bg-primary/10 text-primary",
+    hot: "bg-hot/10 text-hot",
+    gold: "bg-gold/15 text-gold-foreground",
+    success: "bg-success/10 text-success",
+  } as const;
   return (
-    <div
-      className="flex min-h-screen items-center justify-center"
-      style={{ backgroundColor: "#fcfbf8" }}
-    >
-      <img
-        data-lovable-blank-page-placeholder="REMOVE_THIS"
-        src="https://cdn.gpteng.co/blank-app-v1.svg"
-        alt="Your app will live here!"
+    <div className="rounded-xl border border-border bg-card p-5 shadow-sm">
+      <div className="flex items-start justify-between">
+        <div>
+          <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">{label}</p>
+          <p className="mt-2 text-3xl font-semibold tracking-tight text-foreground">{value}</p>
+        </div>
+        <div className={`flex h-10 w-10 items-center justify-center rounded-lg ${toneMap[tone]}`}>
+          <Icon className="h-5 w-5" />
+        </div>
+      </div>
+      <div className="mt-4 flex items-center gap-1.5 text-xs">
+        <span
+          className={`inline-flex items-center gap-0.5 rounded-md px-1.5 py-0.5 font-medium ${
+            positive ? "bg-success/10 text-success" : "bg-hot/10 text-hot"
+          }`}
+        >
+          {positive ? <ArrowUpRight className="h-3 w-3" /> : <ArrowDownRight className="h-3 w-3" />}
+          {delta}
+        </span>
+        <span className="text-muted-foreground">vs last month</span>
+      </div>
+    </div>
+  );
+}
+
+function Dashboard() {
+  const total = leads.length;
+  const hot = leads.filter((l) => l.status === "Hot").length;
+  const appts = leads.filter((l) => l.stage === "Viewing Scheduled").length;
+  const closed = leads.filter((l) => l.stage === "Closed").length;
+  const closedRevenue = leads
+    .filter((l) => l.stage === "Closed")
+    .reduce((a, b) => a + b.budget, 0);
+
+  const recent = [...leads]
+    .sort((a, b) => b.createdAt.localeCompare(a.createdAt))
+    .slice(0, 6);
+
+  const upcoming = leads
+    .filter((l) => l.nextFollowUp)
+    .sort((a, b) => (a.nextFollowUp || "").localeCompare(b.nextFollowUp || ""))
+    .slice(0, 5);
+
+  return (
+    <div>
+      <PageHeader
+        title="Dashboard"
+        description="Welcome back, Layla. Here's what's moving today across your portfolio."
+        actions={
+          <>
+            <button className="inline-flex h-9 items-center gap-1.5 rounded-md border border-border bg-background px-3 text-sm font-medium text-foreground hover:bg-accent">
+              <Download className="h-4 w-4" /> Export
+            </button>
+            <button className="inline-flex h-9 items-center gap-1.5 rounded-md bg-primary px-3 text-sm font-medium text-primary-foreground hover:bg-primary/90">
+              <Plus className="h-4 w-4" /> New Lead
+            </button>
+          </>
+        }
       />
+
+      <div className="space-y-6 p-6">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+          <KpiCard label="Total Leads" value={String(total)} delta="+12.4%" icon={Users} tone="primary" />
+          <KpiCard label="Hot Leads" value={String(hot)} delta="+8.1%" icon={Flame} tone="hot" />
+          <KpiCard
+            label="Appointments Scheduled"
+            value={String(appts)}
+            delta="+3 this week"
+            icon={CalendarCheck2}
+            tone="gold"
+          />
+          <KpiCard
+            label="Deals Closed"
+            value={String(closed)}
+            delta={formatAED(closedRevenue)}
+            icon={Trophy}
+            tone="success"
+          />
+        </div>
+
+        <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
+          <div className="rounded-xl border border-border bg-card p-5 shadow-sm lg:col-span-2">
+            <div className="flex items-center justify-between">
+              <div>
+                <h2 className="text-base font-semibold text-foreground">Lead inflow</h2>
+                <p className="text-xs text-muted-foreground">Last 6 months · across all sources</p>
+              </div>
+              <div className="flex items-center gap-3 text-xs text-muted-foreground">
+                <span className="inline-flex items-center gap-1.5">
+                  <span className="h-2 w-2 rounded-full bg-chart-1" /> Leads
+                </span>
+                <span className="inline-flex items-center gap-1.5">
+                  <span className="h-2 w-2 rounded-full bg-gold" /> Deals
+                </span>
+              </div>
+            </div>
+            <div className="mt-4 h-64">
+              <ResponsiveContainer width="100%" height="100%">
+                <AreaChart data={monthlyPerformance} margin={{ top: 10, right: 10, left: -16, bottom: 0 }}>
+                  <defs>
+                    <linearGradient id="gLeads" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stopColor="var(--chart-1)" stopOpacity={0.35} />
+                      <stop offset="100%" stopColor="var(--chart-1)" stopOpacity={0} />
+                    </linearGradient>
+                    <linearGradient id="gDeals" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stopColor="var(--gold)" stopOpacity={0.4} />
+                      <stop offset="100%" stopColor="var(--gold)" stopOpacity={0} />
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid stroke="var(--border)" strokeDasharray="3 3" vertical={false} />
+                  <XAxis dataKey="month" stroke="var(--muted-foreground)" fontSize={12} tickLine={false} axisLine={false} />
+                  <YAxis stroke="var(--muted-foreground)" fontSize={12} tickLine={false} axisLine={false} />
+                  <Tooltip
+                    contentStyle={{
+                      background: "var(--popover)",
+                      border: "1px solid var(--border)",
+                      borderRadius: 8,
+                      fontSize: 12,
+                    }}
+                  />
+                  <Area type="monotone" dataKey="leads" stroke="var(--chart-1)" fill="url(#gLeads)" strokeWidth={2} />
+                  <Area type="monotone" dataKey="deals" stroke="var(--gold)" fill="url(#gDeals)" strokeWidth={2} />
+                </AreaChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
+
+          <div className="rounded-xl border border-border bg-card p-5 shadow-sm">
+            <h2 className="text-base font-semibold text-foreground">Upcoming follow-ups</h2>
+            <p className="text-xs text-muted-foreground">Next 7 days</p>
+            <ul className="mt-4 space-y-3">
+              {upcoming.map((l) => (
+                <li key={l.id} className="flex items-start justify-between gap-3 rounded-lg border border-border/60 bg-background p-3">
+                  <div className="min-w-0">
+                    <p className="truncate text-sm font-medium text-foreground">{l.name}</p>
+                    <p className="truncate text-xs text-muted-foreground">{l.interest}</p>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-xs font-medium text-foreground">
+                      {new Date(l.nextFollowUp!).toLocaleDateString("en-GB", {
+                        day: "2-digit",
+                        month: "short",
+                      })}
+                    </p>
+                    <StatusBadge status={l.status} />
+                  </div>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+
+        <div className="rounded-xl border border-border bg-card shadow-sm">
+          <div className="flex items-center justify-between border-b border-border px-5 py-4">
+            <div>
+              <h2 className="text-base font-semibold text-foreground">Recent leads</h2>
+              <p className="text-xs text-muted-foreground">Latest 6 enquiries from all channels</p>
+            </div>
+          </div>
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b border-border bg-muted/40 text-left text-xs uppercase tracking-wide text-muted-foreground">
+                  <th className="px-5 py-3 font-medium">Lead</th>
+                  <th className="px-5 py-3 font-medium">Interest</th>
+                  <th className="px-5 py-3 font-medium">Budget</th>
+                  <th className="px-5 py-3 font-medium">Stage</th>
+                  <th className="px-5 py-3 font-medium">Status</th>
+                  <th className="px-5 py-3 font-medium">Agent</th>
+                </tr>
+              </thead>
+              <tbody>
+                {recent.map((l) => (
+                  <tr key={l.id} className="border-b border-border/60 last:border-0 hover:bg-muted/30">
+                    <td className="px-5 py-3">
+                      <div className="font-medium text-foreground">{l.name}</div>
+                      <div className="text-xs text-muted-foreground">{l.nationality} · {l.source}</div>
+                    </td>
+                    <td className="px-5 py-3 text-muted-foreground">{l.interest}</td>
+                    <td className="px-5 py-3 font-medium text-foreground">{formatAED(l.budget)}</td>
+                    <td className="px-5 py-3 text-muted-foreground">{l.stage}</td>
+                    <td className="px-5 py-3"><StatusBadge status={l.status} /></td>
+                    <td className="px-5 py-3 text-muted-foreground">{l.agent}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
