@@ -30,7 +30,7 @@ function PipelinePage() {
         title="Pipeline"
         description={`${leads.length} active opportunities · ${formatAED(totalValue)} weighted value`}
       />
-      <div className="overflow-x-auto p-6">
+      <div className="w-full overflow-x-auto p-6">
         <div className="grid min-w-[1100px] grid-cols-5 gap-4">
           {pipelineStages.map((stage) => {
             const items = leads.filter((l) => l.stage === stage);

@@ -113,7 +113,7 @@ function RootComponent() {
       <SidebarProvider>
         <div className="flex min-h-screen w-full bg-background">
           <AppSidebar />
-          <div className="flex flex-1 flex-col">
+          <div className="flex min-w-0 flex-1 flex-col">
             <header className="sticky top-0 z-30 flex h-14 items-center gap-3 border-b border-border bg-card/80 px-4 backdrop-blur">
               <SidebarTrigger />
               <div className="relative ml-2 hidden flex-1 max-w-md md:block">
