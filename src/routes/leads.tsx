@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { PageHeader } from "@/components/page-header";
 import { StatusBadge } from "@/components/status-badge";
 import { leads, formatAED, pipelineStages } from "@/lib/mock-data";
