@@ -16,6 +16,7 @@ export const Route = createFileRoute("/leads")({
 });
 
 function LeadsPage() {
+  const navigate = useNavigate();
   const [query, setQuery] = useState("");
   const [status, setStatus] = useState<string>("All");
   const [stage, setStage] = useState<string>("All");
