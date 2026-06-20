@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { PageHeader } from "@/components/page-header";
 import { StatusBadge } from "@/components/status-badge";
 import { leads, formatAED, pipelineStages } from "@/lib/mock-data";
@@ -16,6 +16,7 @@ export const Route = createFileRoute("/leads")({
 });
 
 function LeadsPage() {
+  const navigate = useNavigate();
   const [query, setQuery] = useState("");
   const [status, setStatus] = useState<string>("All");
   const [stage, setStage] = useState<string>("All");
@@ -105,9 +106,20 @@ function LeadsPage() {
               </thead>
               <tbody>
                 {filtered.map((l) => (
-                  <tr key={l.id} className="border-b border-border/60 last:border-0 hover:bg-muted/30">
+                  <tr
+                    key={l.id}
+                    onClick={() => navigate({ to: "/leads/$leadId", params: { leadId: l.id } })}
+                    className="cursor-pointer border-b border-border/60 last:border-0 hover:bg-muted/30"
+                  >
                     <td className="px-5 py-3">
-                      <div className="font-medium text-foreground">{l.name}</div>
+                      <Link
+                        to="/leads/$leadId"
+                        params={{ leadId: l.id }}
+                        onClick={(e) => e.stopPropagation()}
+                        className="font-medium text-foreground hover:text-primary hover:underline"
+                      >
+                        {l.name}
+                      </Link>
                       <div className="text-xs text-muted-foreground">{l.id} · {l.nationality}</div>
                     </td>
                     <td className="px-5 py-3">
