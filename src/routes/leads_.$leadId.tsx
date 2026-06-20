@@ -21,7 +21,7 @@ import {
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
 
-export const Route = createFileRoute("/leads/$leadId")({
+export const Route = createFileRoute("/leads_/$leadId")({
   head: ({ params }) => ({
     meta: [
       { title: `Lead ${params.leadId} — Mirage Realty` },
