@@ -106,9 +106,20 @@ function LeadsPage() {
               </thead>
               <tbody>
                 {filtered.map((l) => (
-                  <tr key={l.id} className="border-b border-border/60 last:border-0 hover:bg-muted/30">
+                  <tr
+                    key={l.id}
+                    onClick={() => navigate({ to: "/leads/$leadId", params: { leadId: l.id } })}
+                    className="cursor-pointer border-b border-border/60 last:border-0 hover:bg-muted/30"
+                  >
                     <td className="px-5 py-3">
-                      <div className="font-medium text-foreground">{l.name}</div>
+                      <Link
+                        to="/leads/$leadId"
+                        params={{ leadId: l.id }}
+                        onClick={(e) => e.stopPropagation()}
+                        className="font-medium text-foreground hover:text-primary hover:underline"
+                      >
+                        {l.name}
+                      </Link>
                       <div className="text-xs text-muted-foreground">{l.id} · {l.nationality}</div>
                     </td>
                     <td className="px-5 py-3">
