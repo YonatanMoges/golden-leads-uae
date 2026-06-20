@@ -16,7 +16,7 @@ export const Route = createFileRoute("/leads")({
 });
 
 function LeadsPage() {
-  const navigate = useNavigate();
+  const navigate = useNavigate({ from: "/leads" });
   const [query, setQuery] = useState("");
   const [status, setStatus] = useState<string>("All");
   const [stage, setStage] = useState<string>("All");
@@ -54,6 +54,16 @@ function LeadsPage() {
       />
 
       <div className="p-6">
+        <div className="mb-4">
+          <Link
+            to="/lead-details/$leadId"
+            params={{ leadId: leads[0].id }}
+            className="inline-flex h-9 items-center rounded-md border border-border bg-card px-3 text-sm font-medium text-foreground hover:bg-accent"
+          >
+            Open Sample Lead Details
+          </Link>
+        </div>
+
         <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center">
           <div className="relative flex-1">
             <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
@@ -108,12 +118,12 @@ function LeadsPage() {
                 {filtered.map((l) => (
                   <tr
                     key={l.id}
-                    onClick={() => navigate({ to: "/leads/$leadId", params: { leadId: l.id } })}
+                    onClick={() => navigate({ to: "/lead-details/$leadId", params: { leadId: l.id } })}
                     className="cursor-pointer border-b border-border/60 last:border-0 hover:bg-muted/30"
                   >
                     <td className="px-5 py-3">
                       <Link
-                        to="/leads/$leadId"
+                        to="/lead-details/$leadId"
                         params={{ leadId: l.id }}
                         onClick={(e) => e.stopPropagation()}
                         className="font-medium text-foreground hover:text-primary hover:underline"
