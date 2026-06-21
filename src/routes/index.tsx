@@ -32,7 +32,7 @@ import {
   Tooltip,
   CartesianGrid,
 } from "recharts";
-import { monthlyPerformance } from "@/lib/mock-data";
+
 
 export const Route = createFileRoute("/")({
   head: () => ({
