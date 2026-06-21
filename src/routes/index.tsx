@@ -2,7 +2,14 @@ import { createFileRoute } from "@tanstack/react-router";
 import { Link } from "@tanstack/react-router";
 import { PageHeader } from "@/components/page-header";
 import { StatusBadge } from "@/components/status-badge";
-import { leads, formatAED } from "@/lib/mock-data";
+import {
+  leads,
+  formatAED,
+  monthlyPerformance,
+  leadSourcesChart,
+  leadSourcePerformance,
+  recentActivity,
+} from "@/lib/mock-data";
 import {
   Users,
   Flame,
@@ -15,17 +22,23 @@ import {
   Zap,
   AlertTriangle,
   AlertCircle,
+  UserPlus,
+  Phone,
+  FileText,
+  CheckCircle2,
 } from "lucide-react";
 import {
   ResponsiveContainer,
   AreaChart,
   Area,
+  BarChart,
+  Bar,
   XAxis,
   YAxis,
   Tooltip,
   CartesianGrid,
 } from "recharts";
-import { monthlyPerformance } from "@/lib/mock-data";
+
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -165,6 +178,114 @@ function AiRecommendations() {
   );
 }
 
+function LeadSourcesChart() {
+  return (
+    <div className="rounded-xl border border-border bg-card p-5 shadow-sm">
+      <div>
+        <h2 className="text-base font-semibold text-foreground">Lead Sources</h2>
+        <p className="text-xs text-muted-foreground">Total leads by channel</p>
+      </div>
+      <div className="mt-4 h-64">
+        <ResponsiveContainer width="100%" height="100%">
+          <BarChart data={leadSourcesChart} margin={{ top: 10, right: 10, left: -16, bottom: 0 }}>
+            <CartesianGrid stroke="var(--border)" strokeDasharray="3 3" vertical={false} />
+            <XAxis dataKey="source" stroke="var(--muted-foreground)" fontSize={11} tickLine={false} axisLine={false} />
+            <YAxis stroke="var(--muted-foreground)" fontSize={12} tickLine={false} axisLine={false} />
+            <Tooltip
+              contentStyle={{
+                background: "var(--popover)",
+                border: "1px solid var(--border)",
+                borderRadius: 8,
+                fontSize: 12,
+              }}
+            />
+            <Bar dataKey="count" fill="var(--chart-1)" radius={[6, 6, 0, 0]} />
+          </BarChart>
+        </ResponsiveContainer>
+      </div>
+    </div>
+  );
+}
+
+function RecentActivityPanel() {
+  const iconMap = {
+    "New Lead": { icon: UserPlus, bg: "bg-primary/10", color: "text-primary" },
+    Contacted: { icon: Phone, bg: "bg-warning/15", color: "text-warning" },
+    "Viewing Scheduled": { icon: CalendarCheck2, bg: "bg-gold/15", color: "text-gold-foreground" },
+    "Offer Submitted": { icon: FileText, bg: "bg-chart-5/15", color: "text-chart-5" },
+    "Deal Closed": { icon: CheckCircle2, bg: "bg-success/10", color: "text-success" },
+  } as const;
+
+  return (
+    <div className="rounded-xl border border-border bg-card p-5 shadow-sm">
+      <div>
+        <h2 className="text-base font-semibold text-foreground">Recent Activity</h2>
+        <p className="text-xs text-muted-foreground">Latest events across your pipeline</p>
+      </div>
+      <ul className="mt-4 space-y-3">
+        {recentActivity.map((a) => {
+          const { icon: Icon, bg, color } = iconMap[a.type];
+          return (
+            <li key={a.id} className="flex items-start gap-3 rounded-lg border border-border/60 bg-background p-3">
+              <div className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg ${bg} ${color}`}>
+                <Icon className="h-4 w-4" />
+              </div>
+              <div className="min-w-0 flex-1">
+                <p className="text-sm font-medium text-foreground">{a.type}</p>
+                <p className="text-xs text-muted-foreground">{a.leadName} — {a.detail}</p>
+                <div className="mt-1 flex items-center gap-2 text-xs text-muted-foreground">
+                  <span>{new Date(a.timestamp).toLocaleString("en-GB", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" })}</span>
+                  <span>·</span>
+                  <span>{a.agent}</span>
+                </div>
+              </div>
+            </li>
+          );
+        })}
+      </ul>
+    </div>
+  );
+}
+
+function LeadSourcePerformance() {
+  return (
+    <div className="rounded-xl border border-border bg-card shadow-sm">
+      <div className="flex items-center justify-between border-b border-border px-5 py-4">
+        <div>
+          <h2 className="text-base font-semibold text-foreground">Lead Source Performance</h2>
+          <p className="text-xs text-muted-foreground">Total leads, hot leads, and conversion by source</p>
+        </div>
+      </div>
+      <div className="overflow-x-auto">
+        <table className="w-full text-sm">
+          <thead>
+            <tr className="border-b border-border bg-muted/40 text-left text-xs uppercase tracking-wide text-muted-foreground">
+              <th className="px-5 py-3 font-medium">Source</th>
+              <th className="px-5 py-3 font-medium">Total Leads</th>
+              <th className="px-5 py-3 font-medium">Hot Leads</th>
+              <th className="px-5 py-3 font-medium">Conversion Rate</th>
+            </tr>
+          </thead>
+          <tbody>
+            {leadSourcePerformance.map((s) => (
+              <tr key={s.source} className="border-b border-border/60 last:border-0 hover:bg-muted/30">
+                <td className="px-5 py-3 font-medium text-foreground">{s.source}</td>
+                <td className="px-5 py-3 text-muted-foreground">{s.totalLeads}</td>
+                <td className="px-5 py-3 text-muted-foreground">{s.hotLeads}</td>
+                <td className="px-5 py-3">
+                  <span className="inline-flex items-center rounded-full bg-success/10 px-2 py-0.5 text-xs font-medium text-success">
+                    {s.conversionRate}
+                  </span>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+}
+
 function Dashboard() {
   const total = leads.length;
   const hot = leads.filter((l) => l.status === "Hot").length;
@@ -293,6 +414,15 @@ function Dashboard() {
             </ul>
           </div>
         </div>
+
+        <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
+          <div className="lg:col-span-2">
+            <LeadSourcesChart />
+          </div>
+          <RecentActivityPanel />
+        </div>
+
+        <LeadSourcePerformance />
 
         <div className="rounded-xl border border-border bg-card shadow-sm">
           <div className="flex items-center justify-between border-b border-border px-5 py-4">
