@@ -2,7 +2,14 @@ import { createFileRoute } from "@tanstack/react-router";
 import { Link } from "@tanstack/react-router";
 import { PageHeader } from "@/components/page-header";
 import { StatusBadge } from "@/components/status-badge";
-import { leads, formatAED } from "@/lib/mock-data";
+import {
+  leads,
+  formatAED,
+  monthlyPerformance,
+  leadSourcesChart,
+  leadSourcePerformance,
+  recentActivity,
+} from "@/lib/mock-data";
 import {
   Users,
   Flame,
