@@ -22,6 +22,10 @@ import {
   Zap,
   AlertTriangle,
   AlertCircle,
+  UserPlus,
+  Phone,
+  FileText,
+  CheckCircle2,
 } from "lucide-react";
 import {
   ResponsiveContainer,
