@@ -340,3 +340,97 @@ export const agentPerformance = [
   { agent: "Sara Ibrahim", deals: 7, revenue: 33 },
   { agent: "Yousef Rahim", deals: 5, revenue: 22 },
 ];
+
+export interface ActivityEvent {
+  id: string;
+  type: "New Lead" | "Contacted" | "Viewing Scheduled" | "Offer Submitted" | "Deal Closed";
+  leadName: string;
+  detail: string;
+  timestamp: string; // ISO
+  agent: string;
+}
+
+export const leadSourcesChart = [
+  { source: "Property Finder", count: 48 },
+  { source: "Bayut", count: 36 },
+  { source: "Referral", count: 22 },
+  { source: "Website", count: 24 },
+  { source: "WhatsApp", count: 18 },
+  { source: "Manual Entry", count: 12 },
+];
+
+export const leadSourcePerformance = [
+  { source: "Property Finder", totalLeads: 48, hotLeads: 14, conversionRate: "12.5%" },
+  { source: "Bayut", totalLeads: 36, hotLeads: 10, conversionRate: "11.1%" },
+  { source: "Website", totalLeads: 24, hotLeads: 6, conversionRate: "12.5%" },
+  { source: "WhatsApp", totalLeads: 18, hotLeads: 5, conversionRate: "11.1%" },
+  { source: "Referral", totalLeads: 22, hotLeads: 9, conversionRate: "22.7%" },
+  { source: "Manual Entry", totalLeads: 12, hotLeads: 3, conversionRate: "8.3%" },
+];
+
+export const recentActivity: ActivityEvent[] = [
+  {
+    id: "A-1042",
+    type: "Offer Submitted",
+    leadName: "Ahmed Al Mansouri",
+    detail: "Offer made on Downtown Dubai 2BR unit",
+    timestamp: "2026-06-21T10:30:00",
+    agent: "Layla Hassan",
+  },
+  {
+    id: "A-1036",
+    type: "Viewing Scheduled",
+    leadName: "Fatima Al Zaabi",
+    detail: "Viewing scheduled for Emirates Hills villa",
+    timestamp: "2026-06-21T09:15:00",
+    agent: "Layla Hassan",
+  },
+  {
+    id: "A-1043",
+    type: "New Lead",
+    leadName: "Rashid Al Nuaimi",
+    detail: "Enquiry via WhatsApp for Palm Jumeirah villa",
+    timestamp: "2026-06-21T08:45:00",
+    agent: "Omar Khalil",
+  },
+  {
+    id: "A-1030",
+    type: "Contacted",
+    leadName: "Hassan Karimi",
+    detail: "Follow-up call completed, viewing confirmed",
+    timestamp: "2026-06-20T16:20:00",
+    agent: "Sara Ibrahim",
+  },
+  {
+    id: "A-1033",
+    type: "Deal Closed",
+    leadName: "Sophie Laurent",
+    detail: "AED 3.9M deal closed at JBR · Bahar",
+    timestamp: "2026-06-20T14:00:00",
+    agent: "Layla Hassan",
+  },
+  {
+    id: "A-1044",
+    type: "New Lead",
+    leadName: "Nadia Fakhoury",
+    detail: "Website enquiry for Business Bay apartment",
+    timestamp: "2026-06-20T11:10:00",
+    agent: "Sara Ibrahim",
+  },
+  {
+    id: "A-1038",
+    type: "Offer Submitted",
+    leadName: "Elena Volkova",
+    detail: "Offer submitted for Dubai Marina penthouse",
+    timestamp: "2026-06-19T15:45:00",
+    agent: "Omar Khalil",
+  },
+  {
+    id: "A-1032",
+    type: "Contacted",
+    leadName: "Khalid Al Nahyan",
+    detail: "Initial consultation call completed",
+    timestamp: "2026-06-19T10:00:00",
+    agent: "Layla Hassan",
+  },
+];
