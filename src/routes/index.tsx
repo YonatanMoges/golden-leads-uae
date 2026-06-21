@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { Link } from "@tanstack/react-router";
 import { PageHeader } from "@/components/page-header";
 import { StatusBadge } from "@/components/status-badge";
 import { leads, formatAED } from "@/lib/mock-data";
@@ -11,6 +12,9 @@ import {
   ArrowDownRight,
   Download,
   Plus,
+  Zap,
+  AlertTriangle,
+  AlertCircle,
 } from "lucide-react";
 import {
   ResponsiveContainer,
@@ -80,6 +84,87 @@ function KpiCard({
   );
 }
 
+function AiRecommendations() {
+  const items = [
+    {
+      icon: Zap,
+      iconBg: "bg-hot/10",
+      iconColor: "text-hot",
+      message: "3 hot leads have not been contacted yet.",
+      priority: "High",
+      priorityBg: "bg-hot/10",
+      priorityColor: "text-hot",
+      action: "Review Leads",
+      href: "/leads" as const,
+    },
+    {
+      icon: AlertTriangle,
+      iconBg: "bg-warning/15",
+      iconColor: "text-warning",
+      message: "2 follow-ups are overdue and need immediate attention.",
+      priority: "High",
+      priorityBg: "bg-hot/10",
+      priorityColor: "text-hot",
+      action: "View Follow Ups",
+      href: "/follow-ups" as const,
+    },
+    {
+      icon: CalendarCheck2,
+      iconBg: "bg-primary/10",
+      iconColor: "text-primary",
+      message: "1 property viewing is scheduled for tomorrow.",
+      priority: "Medium",
+      priorityBg: "bg-warning/15",
+      priorityColor: "text-warning",
+      action: "View Pipeline",
+      href: "/pipeline" as const,
+    },
+    {
+      icon: AlertCircle,
+      iconBg: "bg-destructive/10",
+      iconColor: "text-destructive",
+      message: "AED 4.5M pipeline value may be at risk due to delayed follow-up.",
+      priority: "High",
+      priorityBg: "bg-hot/10",
+      priorityColor: "text-hot",
+      action: "Open Pipeline",
+      href: "/pipeline" as const,
+    },
+  ];
+
+  return (
+    <div className="rounded-xl border border-border bg-card p-5 shadow-sm">
+      <div>
+        <h2 className="text-base font-semibold text-foreground">AI Recommendations</h2>
+        <p className="text-xs text-muted-foreground">Intelligent next steps based on your pipeline</p>
+      </div>
+      <div className="mt-4 grid grid-cols-1 gap-3 md:grid-cols-2">
+        {items.map((item, i) => (
+          <div key={i} className="flex items-start gap-3 rounded-lg border border-border/60 bg-background p-3">
+            <div className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg ${item.iconBg} ${item.iconColor}`}>
+              <item.icon className="h-4 w-4" />
+            </div>
+            <div className="min-w-0 flex-1">
+              <p className="text-sm font-medium text-foreground">{item.message}</p>
+              <div className="mt-1.5 flex items-center gap-2">
+                <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${item.priorityBg} ${item.priorityColor}`}>
+                  {item.priority}
+                </span>
+                <Link
+                  to={item.href}
+                  className="text-xs font-medium text-primary hover:underline"
+                >
+                  {item.action}
+                </Link>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 function Dashboard() {
   const total = leads.length;
   const hot = leads.filter((l) => l.status === "Hot").length;
@@ -134,6 +219,8 @@ function Dashboard() {
             tone="success"
           />
         </div>
+
+        <AiRecommendations />
 
         <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
           <div className="rounded-xl border border-border bg-card p-5 shadow-sm lg:col-span-2">
