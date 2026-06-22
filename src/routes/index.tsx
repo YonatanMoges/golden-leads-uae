@@ -8,7 +8,9 @@ import {
   monthlyPerformance,
   leadSourcesChart,
   leadSourcePerformance,
-  recentActivity,
+  agentPerformanceTable,
+  pipelineValueCards,
+  todayActivity,
 } from "@/lib/mock-data";
 import {
   Users,
@@ -23,9 +25,13 @@ import {
   AlertTriangle,
   AlertCircle,
   UserPlus,
-  Phone,
+  Send,
   FileText,
   CheckCircle2,
+  Wallet,
+  TrendingUp,
+  Coins,
+  ShieldAlert,
 } from "lucide-react";
 import {
   ResponsiveContainer,
