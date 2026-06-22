@@ -148,6 +148,8 @@ function formatDue(iso: string) {
 function FollowUpsPage() {
   const [tasks, setTasks] = useState<FollowUpTask[]>(() => makeTasks());
   const [tab, setTab] = useState<Bucket>("today");
+  const [rescheduleId, setRescheduleId] = useState<string | null>(null);
+  const [rescheduleValue, setRescheduleValue] = useState<string>("");
 
   const counts = useMemo(() => {
     const c = { today: 0, overdue: 0, upcoming: 0, completed: 0 } as Record<Bucket, number>;
@@ -169,15 +171,26 @@ function FollowUpsPage() {
     setTasks((prev) => prev.map((t) => (t.id === id ? { ...t, status: "Completed" } : t)));
   }
 
-  function reschedule(id: string) {
+  function openReschedule(task: FollowUpTask) {
+    // default: 2 days from current dueAt, preserve time
+    const d = new Date(task.dueAt);
+    d.setDate(d.getDate() + 2);
+    const pad = (n: number) => String(n).padStart(2, "0");
+    const local = `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+    setRescheduleValue(local);
+    setRescheduleId(task.id);
+  }
+
+  function confirmReschedule() {
+    if (!rescheduleId || !rescheduleValue) return;
+    const iso = `${rescheduleValue}:00`;
     setTasks((prev) =>
-      prev.map((t) => {
-        if (t.id !== id) return t;
-        const d = new Date(t.dueAt);
-        d.setDate(d.getDate() + 2);
-        return { ...t, dueAt: d.toISOString().slice(0, 19), status: "Pending" };
-      }),
+      prev.map((t) => (t.id === rescheduleId ? { ...t, dueAt: iso, status: "Pending" } : t)),
     );
+    // jump user to the bucket the task now lives in
+    const newBucket = bucketize({ ...tasks.find((t) => t.id === rescheduleId)!, dueAt: iso, status: "Pending" });
+    setTab(newBucket);
+    setRescheduleId(null);
   }
 
   const tabs: { key: Bucket; label: string; tone: string }[] = [
