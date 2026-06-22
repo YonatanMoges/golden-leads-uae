@@ -430,6 +430,10 @@ function Dashboard() {
 
         <AiRecommendations />
 
+        <PipelineValueCards />
+
+
+
         <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
           <div className="rounded-xl border border-border bg-card p-5 shadow-sm lg:col-span-2">
             <div className="flex items-center justify-between">
