@@ -317,7 +317,7 @@ function FollowUpsPage() {
                         <CheckCircle2 className="h-3.5 w-3.5" /> Mark Complete
                       </button>
                       <button
-                        onClick={() => reschedule(task.id)}
+                        onClick={() => openReschedule(task)}
                         className="inline-flex h-8 items-center gap-1.5 rounded-md border border-border bg-background px-2.5 text-xs font-medium text-foreground hover:bg-accent"
                       >
                         <RotateCw className="h-3.5 w-3.5" /> Reschedule
