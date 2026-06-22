@@ -148,6 +148,8 @@ function formatDue(iso: string) {
 function FollowUpsPage() {
   const [tasks, setTasks] = useState<FollowUpTask[]>(() => makeTasks());
   const [tab, setTab] = useState<Bucket>("today");
+  const [rescheduleId, setRescheduleId] = useState<string | null>(null);
+  const [rescheduleValue, setRescheduleValue] = useState<string>("");
 
   const counts = useMemo(() => {
     const c = { today: 0, overdue: 0, upcoming: 0, completed: 0 } as Record<Bucket, number>;
@@ -169,15 +171,26 @@ function FollowUpsPage() {
     setTasks((prev) => prev.map((t) => (t.id === id ? { ...t, status: "Completed" } : t)));
   }
 
-  function reschedule(id: string) {
+  function openReschedule(task: FollowUpTask) {
+    // default: 2 days from current dueAt, preserve time
+    const d = new Date(task.dueAt);
+    d.setDate(d.getDate() + 2);
+    const pad = (n: number) => String(n).padStart(2, "0");
+    const local = `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+    setRescheduleValue(local);
+    setRescheduleId(task.id);
+  }
+
+  function confirmReschedule() {
+    if (!rescheduleId || !rescheduleValue) return;
+    const iso = `${rescheduleValue}:00`;
     setTasks((prev) =>
-      prev.map((t) => {
-        if (t.id !== id) return t;
-        const d = new Date(t.dueAt);
-        d.setDate(d.getDate() + 2);
-        return { ...t, dueAt: d.toISOString().slice(0, 19), status: "Pending" };
-      }),
+      prev.map((t) => (t.id === rescheduleId ? { ...t, dueAt: iso, status: "Pending" } : t)),
     );
+    // jump user to the bucket the task now lives in
+    const newBucket = bucketize({ ...tasks.find((t) => t.id === rescheduleId)!, dueAt: iso, status: "Pending" });
+    setTab(newBucket);
+    setRescheduleId(null);
   }
 
   const tabs: { key: Bucket; label: string; tone: string }[] = [
@@ -304,7 +317,7 @@ function FollowUpsPage() {
                         <CheckCircle2 className="h-3.5 w-3.5" /> Mark Complete
                       </button>
                       <button
-                        onClick={() => reschedule(task.id)}
+                        onClick={() => openReschedule(task)}
                         className="inline-flex h-8 items-center gap-1.5 rounded-md border border-border bg-background px-2.5 text-xs font-medium text-foreground hover:bg-accent"
                       >
                         <RotateCw className="h-3.5 w-3.5" /> Reschedule
@@ -324,6 +337,46 @@ function FollowUpsPage() {
           )}
         </div>
       </div>
+
+      {rescheduleId && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4"
+          onClick={() => setRescheduleId(null)}
+        >
+          <div
+            className="w-full max-w-sm rounded-xl border border-border bg-card p-5 shadow-lg"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h3 className="text-base font-semibold text-foreground">Reschedule follow-up</h3>
+            <p className="mt-1 text-xs text-muted-foreground">
+              Pick a new date and time. The task will move to the matching bucket.
+            </p>
+            <label className="mt-4 block text-xs font-medium text-foreground">
+              New date & time
+              <input
+                type="datetime-local"
+                value={rescheduleValue}
+                onChange={(e) => setRescheduleValue(e.target.value)}
+                className="mt-1 w-full rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
+              />
+            </label>
+            <div className="mt-5 flex justify-end gap-2">
+              <button
+                onClick={() => setRescheduleId(null)}
+                className="inline-flex h-9 items-center rounded-md border border-border bg-background px-3 text-sm font-medium text-foreground hover:bg-accent"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={confirmReschedule}
+                className="inline-flex h-9 items-center rounded-md bg-primary px-3 text-sm font-medium text-primary-foreground hover:bg-primary/90"
+              >
+                Confirm
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

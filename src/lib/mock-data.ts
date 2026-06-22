@@ -434,3 +434,32 @@ export const recentActivity: ActivityEvent[] = [
     agent: "Layla Hassan",
   },
 ];
+
+export interface AgentPerformanceRow {
+  agent: string;
+  leads: number;
+  viewings: number;
+  deals: number;
+}
+
+export const agentPerformanceTable: AgentPerformanceRow[] = [
+  { agent: "Ahmed Khan", leads: 23, viewings: 8, deals: 2 },
+  { agent: "Sarah Malik", leads: 19, viewings: 7, deals: 3 },
+  { agent: "Omar Hassan", leads: 15, viewings: 5, deals: 1 },
+  { agent: "Fatima Al Nuaimi", leads: 12, viewings: 4, deals: 1 },
+];
+
+export const pipelineValueCards = [
+  { label: "Total Pipeline", value: 12_400_000, tone: "primary" as const, hint: "Active deals across all stages" },
+  { label: "Closed This Month", value: 2_100_000, tone: "success" as const, hint: "June 2026 closed-won" },
+  { label: "Average Deal Size", value: 1_050_000, tone: "gold" as const, hint: "Trailing 90 days" },
+  { label: "At-Risk Pipeline", value: 4_500_000, tone: "hot" as const, hint: "Stalled or overdue follow-up" },
+];
+
+export const todayActivity = [
+  { id: "T-01", time: "10:32 AM", type: "Lead Added" as const, detail: "New enquiry — Rashid Al Nuaimi · Palm Jumeirah villa", agent: "Omar Khalil" },
+  { id: "T-02", time: "10:35 AM", type: "Follow Up Sent" as const, detail: "WhatsApp sent to Priya Sharma · JVC Belgravia Heights", agent: "Omar Khalil" },
+  { id: "T-03", time: "11:10 AM", type: "Viewing Scheduled" as const, detail: "Fatima Al Zaabi · Emirates Hills Sector W villa", agent: "Layla Hassan" },
+  { id: "T-04", time: "12:20 PM", type: "Offer Submitted" as const, detail: "Ahmed Al Mansouri · Downtown Dubai Burj Vista 2BR", agent: "Layla Hassan" },
+  { id: "T-05", time: "02:45 PM", type: "Deal Closed" as const, detail: "Sophie Laurent · JBR Bahar AED 3.9M signed", agent: "Layla Hassan" },
+];
