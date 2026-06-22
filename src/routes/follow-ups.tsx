@@ -337,6 +337,46 @@ function FollowUpsPage() {
           )}
         </div>
       </div>
+
+      {rescheduleId && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4"
+          onClick={() => setRescheduleId(null)}
+        >
+          <div
+            className="w-full max-w-sm rounded-xl border border-border bg-card p-5 shadow-lg"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h3 className="text-base font-semibold text-foreground">Reschedule follow-up</h3>
+            <p className="mt-1 text-xs text-muted-foreground">
+              Pick a new date and time. The task will move to the matching bucket.
+            </p>
+            <label className="mt-4 block text-xs font-medium text-foreground">
+              New date & time
+              <input
+                type="datetime-local"
+                value={rescheduleValue}
+                onChange={(e) => setRescheduleValue(e.target.value)}
+                className="mt-1 w-full rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
+              />
+            </label>
+            <div className="mt-5 flex justify-end gap-2">
+              <button
+                onClick={() => setRescheduleId(null)}
+                className="inline-flex h-9 items-center rounded-md border border-border bg-background px-3 text-sm font-medium text-foreground hover:bg-accent"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={confirmReschedule}
+                className="inline-flex h-9 items-center rounded-md bg-primary px-3 text-sm font-medium text-primary-foreground hover:bg-primary/90"
+              >
+                Confirm
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
