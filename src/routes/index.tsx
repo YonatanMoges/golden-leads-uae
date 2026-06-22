@@ -215,8 +215,8 @@ function LeadSourcesChart() {
 
 function RecentActivityPanel() {
   const iconMap = {
-    "New Lead": { icon: UserPlus, bg: "bg-primary/10", color: "text-primary" },
-    Contacted: { icon: Phone, bg: "bg-warning/15", color: "text-warning" },
+    "Lead Added": { icon: UserPlus, bg: "bg-primary/10", color: "text-primary" },
+    "Follow Up Sent": { icon: Send, bg: "bg-warning/15", color: "text-warning" },
     "Viewing Scheduled": { icon: CalendarCheck2, bg: "bg-gold/15", color: "text-gold-foreground" },
     "Offer Submitted": { icon: FileText, bg: "bg-chart-5/15", color: "text-chart-5" },
     "Deal Closed": { icon: CheckCircle2, bg: "bg-success/10", color: "text-success" },
@@ -226,10 +226,10 @@ function RecentActivityPanel() {
     <div className="rounded-xl border border-border bg-card p-5 shadow-sm">
       <div>
         <h2 className="text-base font-semibold text-foreground">Recent Activity</h2>
-        <p className="text-xs text-muted-foreground">Latest events across your pipeline</p>
+        <p className="text-xs text-muted-foreground">Today · 22 June 2026</p>
       </div>
       <ul className="mt-4 space-y-3">
-        {recentActivity.map((a) => {
+        {todayActivity.map((a) => {
           const { icon: Icon, bg, color } = iconMap[a.type];
           return (
             <li key={a.id} className="flex items-start gap-3 rounded-lg border border-border/60 bg-background p-3">
@@ -237,18 +237,99 @@ function RecentActivityPanel() {
                 <Icon className="h-4 w-4" />
               </div>
               <div className="min-w-0 flex-1">
-                <p className="text-sm font-medium text-foreground">{a.type}</p>
-                <p className="text-xs text-muted-foreground">{a.leadName} — {a.detail}</p>
-                <div className="mt-1 flex items-center gap-2 text-xs text-muted-foreground">
-                  <span>{new Date(a.timestamp).toLocaleString("en-GB", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" })}</span>
-                  <span>·</span>
-                  <span>{a.agent}</span>
+                <div className="flex items-center justify-between gap-2">
+                  <p className="text-sm font-medium text-foreground">{a.type}</p>
+                  <span className="shrink-0 text-xs font-medium tabular-nums text-muted-foreground">{a.time}</span>
                 </div>
+                <p className="mt-0.5 text-xs text-muted-foreground">{a.detail}</p>
+                <p className="mt-1 text-xs text-muted-foreground">Agent: {a.agent}</p>
               </div>
             </li>
           );
         })}
       </ul>
+    </div>
+  );
+}
+
+function PipelineValueCards() {
+  const toneMap = {
+    primary: { bg: "bg-primary/10", color: "text-primary", icon: Wallet },
+    success: { bg: "bg-success/10", color: "text-success", icon: TrendingUp },
+    gold: { bg: "bg-gold/15", color: "text-gold-foreground", icon: Coins },
+    hot: { bg: "bg-hot/10", color: "text-hot", icon: ShieldAlert },
+  } as const;
+  return (
+    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+      {pipelineValueCards.map((c) => {
+        const t = toneMap[c.tone];
+        return (
+          <div key={c.label} className="rounded-xl border border-border bg-card p-5 shadow-sm">
+            <div className="flex items-start justify-between">
+              <div>
+                <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">{c.label}</p>
+                <p className="mt-2 text-2xl font-semibold tracking-tight text-foreground">{formatAED(c.value)}</p>
+              </div>
+              <div className={`flex h-10 w-10 items-center justify-center rounded-lg ${t.bg} ${t.color}`}>
+                <t.icon className="h-5 w-5" />
+              </div>
+            </div>
+            <p className="mt-3 text-xs text-muted-foreground">{c.hint}</p>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+function AgentPerformancePanel() {
+  return (
+    <div className="rounded-xl border border-border bg-card shadow-sm">
+      <div className="flex items-center justify-between border-b border-border px-5 py-4">
+        <div>
+          <h2 className="text-base font-semibold text-foreground">Agent Performance</h2>
+          <p className="text-xs text-muted-foreground">Leads, viewings, and closed deals this month</p>
+        </div>
+      </div>
+      <div className="overflow-x-auto">
+        <table className="w-full text-sm">
+          <thead>
+            <tr className="border-b border-border bg-muted/40 text-left text-xs uppercase tracking-wide text-muted-foreground">
+              <th className="px-5 py-3 font-medium">Agent</th>
+              <th className="px-5 py-3 font-medium">Leads</th>
+              <th className="px-5 py-3 font-medium">Viewings</th>
+              <th className="px-5 py-3 font-medium">Deals</th>
+              <th className="px-5 py-3 font-medium">Conversion</th>
+            </tr>
+          </thead>
+          <tbody>
+            {agentPerformanceTable.map((a) => {
+              const conv = ((a.deals / a.leads) * 100).toFixed(1) + "%";
+              const initials = a.agent.split(" ").map((p) => p[0]).slice(0, 2).join("");
+              return (
+                <tr key={a.agent} className="border-b border-border/60 last:border-0 hover:bg-muted/30">
+                  <td className="px-5 py-3">
+                    <div className="flex items-center gap-2.5">
+                      <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 text-xs font-semibold text-primary">
+                        {initials}
+                      </div>
+                      <span className="font-medium text-foreground">{a.agent}</span>
+                    </div>
+                  </td>
+                  <td className="px-5 py-3 text-muted-foreground">{a.leads}</td>
+                  <td className="px-5 py-3 text-muted-foreground">{a.viewings}</td>
+                  <td className="px-5 py-3 text-muted-foreground">{a.deals}</td>
+                  <td className="px-5 py-3">
+                    <span className="inline-flex items-center rounded-full bg-success/10 px-2 py-0.5 text-xs font-medium text-success">
+                      {conv}
+                    </span>
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 }
