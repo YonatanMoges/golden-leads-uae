@@ -15,26 +15,51 @@ export const Route = createFileRoute("/leads")({
   component: LeadsPage,
 });
 
+const BUDGET_RANGES = [
+  { label: "All", min: 0, max: Infinity },
+  { label: "Under AED 2M", min: 0, max: 2_000_000 },
+  { label: "AED 2M – 5M", min: 2_000_000, max: 5_000_000 },
+  { label: "AED 5M – 10M", min: 5_000_000, max: 10_000_000 },
+  { label: "AED 10M+", min: 10_000_000, max: Infinity },
+];
+
 function LeadsPage() {
   const navigate = useNavigate({ from: "/leads" });
   const [query, setQuery] = useState("");
   const [status, setStatus] = useState<string>("All");
   const [stage, setStage] = useState<string>("All");
+  const [agent, setAgent] = useState<string>("All");
+  const [propertyType, setPropertyType] = useState<string>("All");
+  const [source, setSource] = useState<string>("All");
+  const [budgetRange, setBudgetRange] = useState<string>("All");
+
+  const agents = useMemo(() => ["All", ...Array.from(new Set(leads.map((l) => l.agent)))], []);
+  const propertyTypes = useMemo(
+    () => ["All", ...Array.from(new Set(leads.map((l) => l.propertyType)))],
+    [],
+  );
+  const sources = useMemo(() => ["All", ...Array.from(new Set(leads.map((l) => l.source)))], []);
 
   const filtered = useMemo(() => {
+    const range = BUDGET_RANGES.find((r) => r.label === budgetRange) ?? BUDGET_RANGES[0];
     return leads.filter((l) => {
       if (status !== "All" && l.status !== status) return false;
       if (stage !== "All" && l.stage !== stage) return false;
+      if (agent !== "All" && l.agent !== agent) return false;
+      if (propertyType !== "All" && l.propertyType !== propertyType) return false;
+      if (source !== "All" && l.source !== source) return false;
+      if (l.budget < range.min || l.budget > range.max) return false;
       if (!query) return true;
       const q = query.toLowerCase();
       return (
         l.name.toLowerCase().includes(q) ||
         l.email.toLowerCase().includes(q) ||
+        l.phone.toLowerCase().includes(q) ||
         l.interest.toLowerCase().includes(q) ||
         l.agent.toLowerCase().includes(q)
       );
     });
-  }, [query, status, stage]);
+  }, [query, status, stage, agent, propertyType, source, budgetRange]);
 
   return (
     <div>
@@ -64,22 +89,23 @@ function LeadsPage() {
           </Link>
         </div>
 
-        <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center">
-          <div className="relative flex-1">
+        <div className="mb-4 space-y-3">
+          <div className="relative">
             <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <input
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              placeholder="Search by name, email, location, agent…"
+              placeholder="Search leads by name, phone, email, or property interest"
               className="h-10 w-full rounded-md border border-input bg-card pl-9 pr-3 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring/40"
             />
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
             <Filter className="h-4 w-4 text-muted-foreground" />
             <select
               value={status}
               onChange={(e) => setStatus(e.target.value)}
-              className="h-10 rounded-md border border-input bg-card px-3 text-sm"
+              className="h-9 rounded-md border border-input bg-card px-2.5 text-sm"
+              aria-label="Status"
             >
               {["All", "Hot", "Warm", "Cold"].map((s) => (
                 <option key={s}>{s}</option>
@@ -88,11 +114,52 @@ function LeadsPage() {
             <select
               value={stage}
               onChange={(e) => setStage(e.target.value)}
-              className="h-10 rounded-md border border-input bg-card px-3 text-sm"
+              className="h-9 rounded-md border border-input bg-card px-2.5 text-sm"
+              aria-label="Stage"
             >
               <option>All</option>
               {pipelineStages.map((s) => (
                 <option key={s}>{s}</option>
+              ))}
+            </select>
+            <select
+              value={agent}
+              onChange={(e) => setAgent(e.target.value)}
+              className="h-9 rounded-md border border-input bg-card px-2.5 text-sm"
+              aria-label="Assigned Agent"
+            >
+              {agents.map((a) => (
+                <option key={a}>{a === "All" ? "All Agents" : a}</option>
+              ))}
+            </select>
+            <select
+              value={propertyType}
+              onChange={(e) => setPropertyType(e.target.value)}
+              className="h-9 rounded-md border border-input bg-card px-2.5 text-sm"
+              aria-label="Property Type"
+            >
+              {propertyTypes.map((p) => (
+                <option key={p}>{p === "All" ? "All Property Types" : p}</option>
+              ))}
+            </select>
+            <select
+              value={budgetRange}
+              onChange={(e) => setBudgetRange(e.target.value)}
+              className="h-9 rounded-md border border-input bg-card px-2.5 text-sm"
+              aria-label="Budget Range"
+            >
+              {BUDGET_RANGES.map((r) => (
+                <option key={r.label}>{r.label === "All" ? "All Budgets" : r.label}</option>
+              ))}
+            </select>
+            <select
+              value={source}
+              onChange={(e) => setSource(e.target.value)}
+              className="h-9 rounded-md border border-input bg-card px-2.5 text-sm"
+              aria-label="Lead Source"
+            >
+              {sources.map((s) => (
+                <option key={s}>{s === "All" ? "All Sources" : s}</option>
               ))}
             </select>
           </div>
