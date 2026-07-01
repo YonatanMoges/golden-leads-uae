@@ -1,8 +1,8 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { PageHeader } from "@/components/page-header";
 import { StatusBadge } from "@/components/status-badge";
-import { leads, formatAED, pipelineStages } from "@/lib/mock-data";
-import { useMemo, useState } from "react";
+import { formatAED, pipelineStages, type Lead } from "@/lib/mock-data";
+import { useEffect, useMemo, useState } from "react";
 import { Search, Filter, Download, Plus, Mail, Phone } from "lucide-react";
 
 export const Route = createFileRoute("/leads")({
@@ -33,6 +33,59 @@ function LeadsPage() {
   const [source, setSource] = useState<string>("All");
   const [budgetRange, setBudgetRange] = useState<string>("All");
 
+  const [liveLeads, setLiveLeads] = useState<Lead[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    async function fetchLeads() {
+      try {
+        const response = await fetch("http://localhost:5678/webhook/real-estate-leads");
+
+        if (!response.ok) {
+          throw new Error("Failed to fetch leads");
+        }
+
+        const data = await response.json();
+
+        const mappedLeads: Lead[] = data.map((item: any) => ({
+          id: item.lead_id,
+          name: item.name,
+          email: item.email,
+          phone: String(item.phone),
+          nationality: "UAE",
+          budget: Number(item.budget),
+          interest: item.property_interest,
+          propertyType: item.property_type,
+          status:
+            item.temperature === "hot"
+              ? "Hot"
+              : item.temperature === "warm"
+                ? "Warm"
+                : "Cold",
+          stage: item.pipeline_stage,
+          agent: item.assigned_agent,
+          source: item.source,
+          createdAt: item.created_at,
+          lastContact: item.last_contacted_at,
+          nextFollowUp: item.next_follow_up_at,
+          notes: item.notes,
+        }));
+
+        setLiveLeads(mappedLeads);
+        console.log(mappedLeads);
+      } catch (err) {
+        setError("Could not load leads from n8n");
+        console.error(err);
+      } finally {
+        setIsLoading(false);
+      }
+    }
+
+    fetchLeads();
+  }, []);
+
+const leads = liveLeads;
   const agents = useMemo(() => ["All", ...Array.from(new Set(leads.map((l) => l.agent)))], []);
   const propertyTypes = useMemo(
     () => ["All", ...Array.from(new Set(leads.map((l) => l.propertyType)))],
@@ -61,6 +114,13 @@ function LeadsPage() {
     });
   }, [query, status, stage, agent, propertyType, source, budgetRange]);
 
+  if (isLoading) {
+    return <div className="p-6 text-sm text-muted-foreground">Loading leads...</div>;
+  }
+  
+  if (error) {
+    return <div className="p-6 text-sm text-red-500">{error}</div>;
+  }
   return (
     <div>
       <PageHeader
