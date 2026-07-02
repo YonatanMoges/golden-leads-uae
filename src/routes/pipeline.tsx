@@ -1,7 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { PageHeader } from "@/components/page-header";
 import { StatusBadge } from "@/components/status-badge";
-import { leads, formatAED, pipelineStages, type PipelineStage } from "@/lib/mock-data";
+import { formatAED, pipelineStages, type Lead, type PipelineStage } from "@/lib/mock-data";
+import { useEffect, useState } from "react";
 
 export const Route = createFileRoute("/pipeline")({
   head: () => ({
@@ -22,6 +23,65 @@ const stageAccent: Record<PipelineStage, string> = {
 };
 
 function PipelinePage() {
+  const [leads, setLeads] = useState<Lead[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    async function fetchLeads() {
+      try {
+        const response = await fetch("http://localhost:5678/webhook/real-estate-leads");
+
+        if (!response.ok) {
+          throw new Error("Failed to fetch leads");
+        }
+
+        const data = await response.json();
+        console.log("Pipeline data from n8n:", data);
+
+        const mappedLeads: Lead[] = data.map((item: any) => ({
+          id: item.lead_id,
+          name: item.name,
+          email: item.email,
+          phone: String(item.phone),
+          nationality: "UAE",
+          budget: Number(item.budget),
+          interest: item.property_interest,
+          propertyType: item.property_type || "Apartment",
+          status:
+            item.temperature === "hot"
+              ? "Hot"
+              : item.temperature === "warm"
+                ? "Warm"
+                : "Cold",
+          stage: item.pipeline_stage || "New Lead",
+          agent: item.assigned_agent,
+          source: item.source,
+          createdAt: item.created_at,
+          lastContact: item.last_contacted_at,
+          nextFollowUp: item.next_follow_up_at,
+          notes: item.notes,
+        }));
+
+        setLeads(mappedLeads);
+      } catch (err) {
+        setError("Could not load pipeline data from n8n");
+        console.error("Pipeline fetch/mapping error:", err);
+      } finally {
+        setIsLoading(false);
+      }
+    }
+
+    fetchLeads();
+  }, []);
+
+  if (isLoading) {
+    return <div className="p-6 text-sm text-muted-foreground">Loading pipeline...</div>;
+  }
+
+  if (error) {
+    return <div className="p-6 text-sm text-red-500">{error}</div>;
+  }
   const totalValue = leads.reduce((a, b) => a + b.budget, 0);
 
   return (

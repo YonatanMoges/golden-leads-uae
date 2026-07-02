@@ -86,10 +86,10 @@ function LeadsPage() {
   }, []);
 
 const leads = liveLeads;
-  const agents = useMemo(() => ["All", ...Array.from(new Set(leads.map((l) => l.agent)))], []);
+  const agents = useMemo(() => ["All", ...Array.from(new Set(leads.map((l) => l.agent)))], [leads]);
   const propertyTypes = useMemo(
     () => ["All", ...Array.from(new Set(leads.map((l) => l.propertyType)))],
-    [],
+    [leads],
   );
   const sources = useMemo(() => ["All", ...Array.from(new Set(leads.map((l) => l.source)))], []);
 
