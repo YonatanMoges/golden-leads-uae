@@ -3,7 +3,6 @@ import { Link } from "@tanstack/react-router";
 import { PageHeader } from "@/components/page-header";
 import { StatusBadge } from "@/components/status-badge";
 import {
-  leads,
   formatAED,
   monthlyPerformance,
   leadSourcesChart,
@@ -12,6 +11,9 @@ import {
   pipelineValueCards,
   todayActivity,
 } from "@/lib/mock-data";
+
+import { useLeads } from "@/hooks/useLeads";
+
 import {
   Users,
   Flame,
@@ -374,6 +376,14 @@ function LeadSourcePerformance() {
 }
 
 function Dashboard() {
+  const { leads, isLoading, error } = useLeads();
+  if (isLoading) {
+    return <div className="p-6 text-sm text-muted-foreground">Loading dashboard...</div>;
+  }
+  
+  if (error) {
+    return <div className="p-6 text-sm text-red-500">{error}</div>;
+  }
   const total = leads.length;
   const hot = leads.filter((l) => l.status === "Hot").length;
   const appts = leads.filter((l) => l.stage === "Viewing Scheduled").length;
@@ -381,7 +391,7 @@ function Dashboard() {
   const closedRevenue = leads
     .filter((l) => l.stage === "Closed")
     .reduce((a, b) => a + b.budget, 0);
-
+  const pipelineValue = leads.reduce((sum, lead) => sum + lead.budget, 0);
   const recent = [...leads]
     .sort((a, b) => b.createdAt.localeCompare(a.createdAt))
     .slice(0, 6);

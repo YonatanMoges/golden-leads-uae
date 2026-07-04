@@ -4,6 +4,7 @@ import { StatusBadge } from "@/components/status-badge";
 import { formatAED, pipelineStages, type Lead } from "@/lib/mock-data";
 import { useEffect, useMemo, useState } from "react";
 import { Search, Filter, Download, Plus, Mail, Phone } from "lucide-react";
+import { useLeads } from "@/hooks/useLeads";
 
 export const Route = createFileRoute("/leads")({
   head: () => ({
@@ -33,65 +34,13 @@ function LeadsPage() {
   const [source, setSource] = useState<string>("All");
   const [budgetRange, setBudgetRange] = useState<string>("All");
 
-  const [liveLeads, setLiveLeads] = useState<Lead[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    async function fetchLeads() {
-      try {
-        const response = await fetch("http://localhost:5678/webhook/real-estate-leads");
-
-        if (!response.ok) {
-          throw new Error("Failed to fetch leads");
-        }
-
-        const data = await response.json();
-
-        const mappedLeads: Lead[] = data.map((item: any) => ({
-          id: item.lead_id,
-          name: item.name,
-          email: item.email,
-          phone: String(item.phone),
-          nationality: "UAE",
-          budget: Number(item.budget),
-          interest: item.property_interest,
-          propertyType: item.property_type,
-          status:
-            item.temperature === "hot"
-              ? "Hot"
-              : item.temperature === "warm"
-                ? "Warm"
-                : "Cold",
-          stage: item.pipeline_stage,
-          agent: item.assigned_agent,
-          source: item.source,
-          createdAt: item.created_at,
-          lastContact: item.last_contacted_at,
-          nextFollowUp: item.next_follow_up_at,
-          notes: item.notes,
-        }));
-
-        setLiveLeads(mappedLeads);
-        console.log(mappedLeads);
-      } catch (err) {
-        setError("Could not load leads from n8n");
-        console.error(err);
-      } finally {
-        setIsLoading(false);
-      }
-    }
-
-    fetchLeads();
-  }, []);
-
-const leads = liveLeads;
+  const { leads, isLoading, error } = useLeads();
   const agents = useMemo(() => ["All", ...Array.from(new Set(leads.map((l) => l.agent)))], [leads]);
   const propertyTypes = useMemo(
     () => ["All", ...Array.from(new Set(leads.map((l) => l.propertyType)))],
     [leads],
   );
-  const sources = useMemo(() => ["All", ...Array.from(new Set(leads.map((l) => l.source)))], []);
+  const sources = useMemo(() => ["All", ...Array.from(new Set(leads.map((l) => l.source)))], [leads]);
 
   const filtered = useMemo(() => {
     const range = BUDGET_RANGES.find((r) => r.label === budgetRange) ?? BUDGET_RANGES[0];
@@ -112,7 +61,7 @@ const leads = liveLeads;
         l.agent.toLowerCase().includes(q)
       );
     });
-  }, [query, status, stage, agent, propertyType, source, budgetRange]);
+  }, [leads, query, status, stage, agent, propertyType, source, budgetRange]);
 
   if (isLoading) {
     return <div className="p-6 text-sm text-muted-foreground">Loading leads...</div>;
@@ -121,6 +70,10 @@ const leads = liveLeads;
   if (error) {
     return <div className="p-6 text-sm text-red-500">{error}</div>;
   }
+
+  console.log("leads:", leads);
+  console.log("filtered:", filtered);
+  console.log({ status, stage, agent, propertyType, source, budgetRange, query });
   return (
     <div>
       <PageHeader
@@ -189,8 +142,10 @@ const leads = liveLeads;
               aria-label="Assigned Agent"
             >
               {agents.map((a) => (
-                <option key={a}>{a === "All" ? "All Agents" : a}</option>
-              ))}
+              <option key={a} value={a}>
+                {a === "All" ? "All Agents" : a}
+              </option>
+            ))}
             </select>
             <select
               value={propertyType}
@@ -199,8 +154,10 @@ const leads = liveLeads;
               aria-label="Property Type"
             >
               {propertyTypes.map((p) => (
-                <option key={p}>{p === "All" ? "All Property Types" : p}</option>
-              ))}
+              <option key={p} value={p}>
+                {p === "All" ? "All Property Types" : p}
+              </option>
+            ))}
             </select>
             <select
               value={budgetRange}
@@ -209,8 +166,10 @@ const leads = liveLeads;
               aria-label="Budget Range"
             >
               {BUDGET_RANGES.map((r) => (
-                <option key={r.label}>{r.label === "All" ? "All Budgets" : r.label}</option>
-              ))}
+              <option key={r.label} value={r.label}>
+                {r.label === "All" ? "All Budgets" : r.label}
+              </option>
+            ))}
             </select>
             <select
               value={source}
@@ -219,8 +178,10 @@ const leads = liveLeads;
               aria-label="Lead Source"
             >
               {sources.map((s) => (
-                <option key={s}>{s === "All" ? "All Sources" : s}</option>
-              ))}
+              <option key={s} value={s}>
+                {s === "All" ? "All Sources" : s}
+              </option>
+            ))}
             </select>
           </div>
         </div>
