@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import type { Lead } from "@/lib/mock-data";
 
-const LEADS_WEBHOOK_URL = "http://localhost:5678/webhook/real-estate-leads";
+const LEADS_WEBHOOK_URL = import.meta.env.VITE_N8N_WEBHOOK_URL;
 
 export function useLeads() {
   const [leads, setLeads] = useState<Lead[]>([]);

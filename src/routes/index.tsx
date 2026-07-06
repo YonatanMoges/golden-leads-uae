@@ -8,8 +8,8 @@ import {
   leadSourcesChart,
   leadSourcePerformance,
   agentPerformanceTable,
-  pipelineValueCards,
   todayActivity,
+  type Lead,
 } from "@/lib/mock-data";
 
 import { useLeads } from "@/hooks/useLeads";
@@ -105,13 +105,37 @@ function KpiCard({
   );
 }
 
-function AiRecommendations() {
+function AiRecommendations({ leads }: { leads: Lead[] }) {
+  const hotNotContacted = leads.filter(
+    (lead) => lead.status === "Hot" && lead.stage === "New Lead"
+  );
+  
+  const overdueFollowUps = leads.filter((lead) => {
+    if (!lead.nextFollowUp) return false;
+    return new Date(lead.nextFollowUp) < new Date();
+  });
+  
+  const tomorrow = new Date();
+  tomorrow.setDate(tomorrow.getDate() + 1);
+  const tomorrowString = tomorrow.toISOString().slice(0, 10);
+  
+  const viewingsTomorrow = leads.filter(
+    (lead) =>
+      lead.stage === "Viewing Scheduled" &&
+      lead.nextFollowUp === tomorrowString
+  );
+  
+  const atRiskValue = hotNotContacted.reduce(
+    (sum, lead) => sum + lead.budget,
+    0
+  );
+  
   const items = [
     {
       icon: Zap,
       iconBg: "bg-hot/10",
       iconColor: "text-hot",
-      message: "3 hot leads have not been contacted yet.",
+      message: `${hotNotContacted.length} hot leads have not been contacted yet.`,
       priority: "High",
       priorityBg: "bg-hot/10",
       priorityColor: "text-hot",
@@ -122,10 +146,10 @@ function AiRecommendations() {
       icon: AlertTriangle,
       iconBg: "bg-warning/15",
       iconColor: "text-warning",
-      message: "2 follow-ups are overdue and need immediate attention.",
-      priority: "High",
-      priorityBg: "bg-hot/10",
-      priorityColor: "text-hot",
+      message: `${overdueFollowUps.length} follow-ups are overdue and need attention.`,
+      priority: overdueFollowUps.length > 0 ? "High" : "Low",
+      priorityBg: overdueFollowUps.length > 0 ? "bg-hot/10" : "bg-success/10",
+      priorityColor: overdueFollowUps.length > 0 ? "text-hot" : "text-success",
       action: "View Follow Ups",
       href: "/follow-ups" as const,
     },
@@ -133,7 +157,7 @@ function AiRecommendations() {
       icon: CalendarCheck2,
       iconBg: "bg-primary/10",
       iconColor: "text-primary",
-      message: "1 property viewing is scheduled for tomorrow.",
+      message: `${viewingsTomorrow.length} property viewing is scheduled for tomorrow.`,
       priority: "Medium",
       priorityBg: "bg-warning/15",
       priorityColor: "text-warning",
@@ -144,10 +168,10 @@ function AiRecommendations() {
       icon: AlertCircle,
       iconBg: "bg-destructive/10",
       iconColor: "text-destructive",
-      message: "AED 4.5M pipeline value may be at risk due to delayed follow-up.",
-      priority: "High",
-      priorityBg: "bg-hot/10",
-      priorityColor: "text-hot",
+      message: `${formatAED(atRiskValue)} pipeline value may be at risk due to delayed follow-up.`,
+      priority: atRiskValue > 0 ? "High" : "Low",
+      priorityBg: atRiskValue > 0 ? "bg-hot/10" : "bg-success/10",
+      priorityColor: atRiskValue > 0 ? "text-hot" : "text-success",
       action: "Open Pipeline",
       href: "/pipeline" as const,
     },
@@ -215,36 +239,121 @@ function LeadSourcesChart() {
   );
 }
 
-function RecentActivityPanel() {
+function RecentActivityPanel({ leads }: { leads: Lead[] }) {
   const iconMap = {
-    "Lead Added": { icon: UserPlus, bg: "bg-primary/10", color: "text-primary" },
-    "Follow Up Sent": { icon: Send, bg: "bg-warning/15", color: "text-warning" },
-    "Viewing Scheduled": { icon: CalendarCheck2, bg: "bg-gold/15", color: "text-gold-foreground" },
-    "Offer Submitted": { icon: FileText, bg: "bg-chart-5/15", color: "text-chart-5" },
-    "Deal Closed": { icon: CheckCircle2, bg: "bg-success/10", color: "text-success" },
+    "Lead Added": {
+      icon: UserPlus,
+      bg: "bg-primary/10",
+      color: "text-primary",
+    },
+    "Follow Up Due": {
+      icon: Send,
+      bg: "bg-warning/15",
+      color: "text-warning",
+    },
+    "Viewing Scheduled": {
+      icon: CalendarCheck2,
+      bg: "bg-gold/15",
+      color: "text-gold-foreground",
+    },
+    "Deal Closed": {
+      icon: CheckCircle2,
+      bg: "bg-success/10",
+      color: "text-success",
+    },
   } as const;
+
+  const activities = leads
+    .flatMap((lead) => {
+      const result = [];
+
+      result.push({
+        type: "Lead Added",
+        date: lead.createdAt,
+        detail: `${lead.name} entered the CRM.`,
+        agent: lead.agent,
+      });
+
+      if (lead.stage === "Viewing Scheduled") {
+        result.push({
+          type: "Viewing Scheduled",
+          date: lead.lastContact,
+          detail: `${lead.name} scheduled a property viewing.`,
+          agent: lead.agent,
+        });
+      }
+
+      if (lead.stage === "Closed") {
+        result.push({
+          type: "Deal Closed",
+          date: lead.lastContact,
+          detail: `${lead.name}'s deal was successfully closed.`,
+          agent: lead.agent,
+        });
+      }
+
+      if (lead.nextFollowUp) {
+        result.push({
+          type: "Follow Up Due",
+          date: lead.nextFollowUp,
+          detail: `Follow-up scheduled for ${lead.name}.`,
+          agent: lead.agent,
+        });
+      }
+
+      return result;
+    })
+    .sort((a, b) => b.date.localeCompare(a.date))
+    .slice(0, 6);
 
   return (
     <div className="rounded-xl border border-border bg-card p-5 shadow-sm">
       <div>
-        <h2 className="text-base font-semibold text-foreground">Recent Activity</h2>
-        <p className="text-xs text-muted-foreground">Today · 22 June 2026</p>
+        <h2 className="text-base font-semibold text-foreground">
+          Recent Activity
+        </h2>
+        <p className="text-xs text-muted-foreground">
+          Generated from live CRM data
+        </p>
       </div>
+
       <ul className="mt-4 space-y-3">
-        {todayActivity.map((a) => {
-          const { icon: Icon, bg, color } = iconMap[a.type];
+        {activities.map((a, index) => {
+          const { icon: Icon, bg, color } =
+            iconMap[a.type as keyof typeof iconMap];
+
           return (
-            <li key={a.id} className="flex items-start gap-3 rounded-lg border border-border/60 bg-background p-3">
-              <div className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg ${bg} ${color}`}>
+            <li
+              key={index}
+              className="flex items-start gap-3 rounded-lg border border-border/60 bg-background p-3"
+            >
+              <div
+                className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg ${bg} ${color}`}
+              >
                 <Icon className="h-4 w-4" />
               </div>
+
               <div className="min-w-0 flex-1">
-                <div className="flex items-center justify-between gap-2">
-                  <p className="text-sm font-medium text-foreground">{a.type}</p>
-                  <span className="shrink-0 text-xs font-medium tabular-nums text-muted-foreground">{a.time}</span>
+                <div className="flex items-center justify-between">
+                  <p className="text-sm font-medium text-foreground">
+                    {a.type}
+                  </p>
+
+                  <span className="text-xs text-muted-foreground">
+                    {new Date(a.date).toLocaleDateString("en-GB", {
+                      day: "2-digit",
+                      month: "short",
+                    })}
+                  </span>
                 </div>
-                <p className="mt-0.5 text-xs text-muted-foreground">{a.detail}</p>
-                <p className="mt-1 text-xs text-muted-foreground">Agent: {a.agent}</p>
+
+                <p className="mt-1 text-xs text-muted-foreground">
+                  {a.detail}
+                </p>
+
+                <p className="mt-1 text-xs text-muted-foreground">
+                  Agent: {a.agent}
+                </p>
               </div>
             </li>
           );
@@ -254,16 +363,55 @@ function RecentActivityPanel() {
   );
 }
 
-function PipelineValueCards() {
+
+function PipelineValueCards({ leads }: { leads: Lead[] })  {
   const toneMap = {
     primary: { bg: "bg-primary/10", color: "text-primary", icon: Wallet },
     success: { bg: "bg-success/10", color: "text-success", icon: TrendingUp },
     gold: { bg: "bg-gold/15", color: "text-gold-foreground", icon: Coins },
     hot: { bg: "bg-hot/10", color: "text-hot", icon: ShieldAlert },
   } as const;
+    const totalPipeline = leads.reduce((sum, lead) => sum + lead.budget, 0);
+
+  const closedThisMonth = leads
+    .filter((lead) => lead.stage === "Closed")
+    .reduce((sum, lead) => sum + lead.budget, 0);
+
+  const averageDealSize = leads.length > 0 ? totalPipeline / leads.length : 0;
+
+  const atRiskPipeline = leads
+    .filter((lead) => lead.status === "Hot" && lead.stage !== "Closed")
+    .reduce((sum, lead) => sum + lead.budget, 0);
+
+  const livePipelineValueCards = [
+    {
+      label: "Total Pipeline",
+      value: totalPipeline,
+      hint: "Total value of all active leads",
+      tone: "primary" as const,
+    },
+    {
+      label: "Closed This Month",
+      value: closedThisMonth,
+      hint: "Closed deal value from live CRM data",
+      tone: "success" as const,
+    },
+    {
+      label: "Average Deal Size",
+      value: averageDealSize,
+      hint: "Average budget per lead",
+      tone: "gold" as const,
+    },
+    {
+      label: "At-Risk Pipeline",
+      value: atRiskPipeline,
+      hint: "Hot leads not yet closed",
+      tone: "hot" as const,
+    },
+  ];
   return (
     <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
-      {pipelineValueCards.map((c) => {
+      {livePipelineValueCards.map((c) => {
         const t = toneMap[c.tone];
         return (
           <div key={c.label} className="rounded-xl border border-border bg-card p-5 shadow-sm">
@@ -284,15 +432,54 @@ function PipelineValueCards() {
   );
 }
 
-function AgentPerformancePanel() {
+function AgentPerformancePanel({ leads }: { leads: Lead[] }) {
+  const agentStats = Object.values(
+    leads.reduce(
+      (acc, lead) => {
+        if (!acc[lead.agent]) {
+          acc[lead.agent] = {
+            agent: lead.agent,
+            leads: 0,
+            viewings: 0,
+            deals: 0,
+          };
+        }
+
+        acc[lead.agent].leads += 1;
+
+        if (lead.stage === "Viewing Scheduled") {
+          acc[lead.agent].viewings += 1;
+        }
+
+        if (lead.stage === "Closed") {
+          acc[lead.agent].deals += 1;
+        }
+
+        return acc;
+      },
+      {} as Record<
+        string,
+        {
+          agent: string;
+          leads: number;
+          viewings: number;
+          deals: number;
+        }
+      >,
+    ),
+  );
+
   return (
     <div className="rounded-xl border border-border bg-card shadow-sm">
       <div className="flex items-center justify-between border-b border-border px-5 py-4">
         <div>
           <h2 className="text-base font-semibold text-foreground">Agent Performance</h2>
-          <p className="text-xs text-muted-foreground">Leads, viewings, and closed deals this month</p>
+          <p className="text-xs text-muted-foreground">
+            Leads, viewings, and closed deals from live CRM data
+          </p>
         </div>
       </div>
+
       <div className="overflow-x-auto">
         <table className="w-full text-sm">
           <thead>
@@ -304,12 +491,23 @@ function AgentPerformancePanel() {
               <th className="px-5 py-3 font-medium">Conversion</th>
             </tr>
           </thead>
+
           <tbody>
-            {agentPerformanceTable.map((a) => {
-              const conv = ((a.deals / a.leads) * 100).toFixed(1) + "%";
-              const initials = a.agent.split(" ").map((p) => p[0]).slice(0, 2).join("");
+            {agentStats.map((a) => {
+              const conv =
+                a.leads > 0 ? ((a.deals / a.leads) * 100).toFixed(1) + "%" : "0.0%";
+
+              const initials = a.agent
+                .split(" ")
+                .map((p) => p[0])
+                .slice(0, 2)
+                .join("");
+
               return (
-                <tr key={a.agent} className="border-b border-border/60 last:border-0 hover:bg-muted/30">
+                <tr
+                  key={a.agent}
+                  className="border-b border-border/60 last:border-0 hover:bg-muted/30"
+                >
                   <td className="px-5 py-3">
                     <div className="flex items-center gap-2.5">
                       <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 text-xs font-semibold text-primary">
@@ -318,9 +516,11 @@ function AgentPerformancePanel() {
                       <span className="font-medium text-foreground">{a.agent}</span>
                     </div>
                   </td>
+
                   <td className="px-5 py-3 text-muted-foreground">{a.leads}</td>
                   <td className="px-5 py-3 text-muted-foreground">{a.viewings}</td>
                   <td className="px-5 py-3 text-muted-foreground">{a.deals}</td>
+
                   <td className="px-5 py-3">
                     <span className="inline-flex items-center rounded-full bg-success/10 px-2 py-0.5 text-xs font-medium text-success">
                       {conv}
@@ -335,16 +535,56 @@ function AgentPerformancePanel() {
     </div>
   );
 }
+function LeadSourcePerformance({ leads }: { leads: Lead[] }) {
+  const sourceStats = Object.values(
+    leads.reduce(
+      (acc, lead) => {
+        if (!acc[lead.source]) {
+          acc[lead.source] = {
+            source: lead.source,
+            totalLeads: 0,
+            hotLeads: 0,
+            closedDeals: 0,
+          };
+        }
 
-function LeadSourcePerformance() {
+        acc[lead.source].totalLeads++;
+
+        if (lead.status === "Hot") {
+          acc[lead.source].hotLeads++;
+        }
+
+        if (lead.stage === "Closed") {
+          acc[lead.source].closedDeals++;
+        }
+
+        return acc;
+      },
+      {} as Record<
+        string,
+        {
+          source: string;
+          totalLeads: number;
+          hotLeads: number;
+          closedDeals: number;
+        }
+      >,
+    ),
+  );
+
   return (
     <div className="rounded-xl border border-border bg-card shadow-sm">
       <div className="flex items-center justify-between border-b border-border px-5 py-4">
         <div>
-          <h2 className="text-base font-semibold text-foreground">Lead Source Performance</h2>
-          <p className="text-xs text-muted-foreground">Total leads, hot leads, and conversion by source</p>
+          <h2 className="text-base font-semibold text-foreground">
+            Lead Source Performance
+          </h2>
+          <p className="text-xs text-muted-foreground">
+            Live performance by lead source
+          </p>
         </div>
       </div>
+
       <div className="overflow-x-auto">
         <table className="w-full text-sm">
           <thead>
@@ -355,19 +595,39 @@ function LeadSourcePerformance() {
               <th className="px-5 py-3 font-medium">Conversion Rate</th>
             </tr>
           </thead>
+
           <tbody>
-            {leadSourcePerformance.map((s) => (
-              <tr key={s.source} className="border-b border-border/60 last:border-0 hover:bg-muted/30">
-                <td className="px-5 py-3 font-medium text-foreground">{s.source}</td>
-                <td className="px-5 py-3 text-muted-foreground">{s.totalLeads}</td>
-                <td className="px-5 py-3 text-muted-foreground">{s.hotLeads}</td>
-                <td className="px-5 py-3">
-                  <span className="inline-flex items-center rounded-full bg-success/10 px-2 py-0.5 text-xs font-medium text-success">
-                    {s.conversionRate}
-                  </span>
-                </td>
-              </tr>
-            ))}
+            {sourceStats.map((s) => {
+              const conversion =
+                s.totalLeads > 0
+                  ? ((s.closedDeals / s.totalLeads) * 100).toFixed(1) + "%"
+                  : "0.0%";
+
+              return (
+                <tr
+                  key={s.source}
+                  className="border-b border-border/60 last:border-0 hover:bg-muted/30"
+                >
+                  <td className="px-5 py-3 font-medium text-foreground">
+                    {s.source}
+                  </td>
+
+                  <td className="px-5 py-3 text-muted-foreground">
+                    {s.totalLeads}
+                  </td>
+
+                  <td className="px-5 py-3 text-muted-foreground">
+                    {s.hotLeads}
+                  </td>
+
+                  <td className="px-5 py-3">
+                    <span className="inline-flex items-center rounded-full bg-success/10 px-2 py-0.5 text-xs font-medium text-success">
+                      {conversion}
+                    </span>
+                  </td>
+                </tr>
+              );
+            })}
           </tbody>
         </table>
       </div>
@@ -405,7 +665,7 @@ function Dashboard() {
     <div>
       <PageHeader
         title="Dashboard"
-        description="Welcome back, Layla. Here's what's moving today across your portfolio."
+        description={`Live CRM • ${total} active leads • ${formatAED(pipelineValue)} pipeline`}
         actions={
           <>
             <button className="inline-flex h-9 items-center gap-1.5 rounded-md border border-border bg-background px-3 text-sm font-medium text-foreground hover:bg-accent">
@@ -438,9 +698,9 @@ function Dashboard() {
           />
         </div>
 
-        <AiRecommendations />
+        <AiRecommendations leads={leads} />
 
-        <PipelineValueCards />
+        <PipelineValueCards leads={leads} />
 
 
 
@@ -520,12 +780,12 @@ function Dashboard() {
           <div className="lg:col-span-2">
             <LeadSourcesChart />
           </div>
-          <RecentActivityPanel />
+          <RecentActivityPanel leads={leads} />
         </div>
 
-        <LeadSourcePerformance />
+        <LeadSourcePerformance leads={leads} />
 
-        <AgentPerformancePanel />
+        <AgentPerformancePanel leads={leads} />
 
         <div className="rounded-xl border border-border bg-card shadow-sm">
           <div className="flex items-center justify-between border-b border-border px-5 py-4">
