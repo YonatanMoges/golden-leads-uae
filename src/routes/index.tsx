@@ -47,6 +47,11 @@ import {
   CartesianGrid,
 } from "recharts";
 
+import {
+  getKPIs,
+  getRecentLeads,
+  getUpcomingFollowUps,
+} from "@/lib/dashboard";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -644,22 +649,17 @@ function Dashboard() {
   if (error) {
     return <div className="p-6 text-sm text-red-500">{error}</div>;
   }
-  const total = leads.length;
-  const hot = leads.filter((l) => l.status === "Hot").length;
-  const appts = leads.filter((l) => l.stage === "Viewing Scheduled").length;
-  const closed = leads.filter((l) => l.stage === "Closed").length;
-  const closedRevenue = leads
-    .filter((l) => l.stage === "Closed")
-    .reduce((a, b) => a + b.budget, 0);
-  const pipelineValue = leads.reduce((sum, lead) => sum + lead.budget, 0);
-  const recent = [...leads]
-    .sort((a, b) => b.createdAt.localeCompare(a.createdAt))
-    .slice(0, 6);
-
-  const upcoming = leads
-    .filter((l) => l.nextFollowUp)
-    .sort((a, b) => (a.nextFollowUp || "").localeCompare(b.nextFollowUp || ""))
-    .slice(0, 5);
+  const {
+    total,
+    hot,
+    appointments,
+    closed,
+    closedRevenue,
+    pipelineValue,
+  } = getKPIs(leads);
+  
+  const recent = getRecentLeads(leads);
+  const upcoming = getUpcomingFollowUps(leads);
 
   return (
     <div>
@@ -684,7 +684,7 @@ function Dashboard() {
           <KpiCard label="Hot Leads" value={String(hot)} delta="+8.1%" icon={Flame} tone="hot" />
           <KpiCard
             label="Appointments Scheduled"
-            value={String(appts)}
+            value={String(appointments)}
             delta="+3 this week"
             icon={CalendarCheck2}
             tone="gold"
