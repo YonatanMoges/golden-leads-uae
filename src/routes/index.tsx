@@ -51,6 +51,7 @@ import {
   getKPIs,
   getRecentLeads,
   getUpcomingFollowUps,
+  getPipelineValueCards,
 } from "@/lib/dashboard";
 
 export const Route = createFileRoute("/")({
@@ -388,32 +389,7 @@ function PipelineValueCards({ leads }: { leads: Lead[] })  {
     .filter((lead) => lead.status === "Hot" && lead.stage !== "Closed")
     .reduce((sum, lead) => sum + lead.budget, 0);
 
-  const livePipelineValueCards = [
-    {
-      label: "Total Pipeline",
-      value: totalPipeline,
-      hint: "Total value of all active leads",
-      tone: "primary" as const,
-    },
-    {
-      label: "Closed This Month",
-      value: closedThisMonth,
-      hint: "Closed deal value from live CRM data",
-      tone: "success" as const,
-    },
-    {
-      label: "Average Deal Size",
-      value: averageDealSize,
-      hint: "Average budget per lead",
-      tone: "gold" as const,
-    },
-    {
-      label: "At-Risk Pipeline",
-      value: atRiskPipeline,
-      hint: "Hot leads not yet closed",
-      tone: "hot" as const,
-    },
-  ];
+    const livePipelineValueCards = getPipelineValueCards(leads);
   return (
     <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
       {livePipelineValueCards.map((c) => {
