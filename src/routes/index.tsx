@@ -52,6 +52,8 @@ import {
   getRecentLeads,
   getUpcomingFollowUps,
   getPipelineValueCards,
+  getLeadSourcesChart,
+  getMonthlyLeadInflow,
 } from "@/lib/dashboard";
 
 export const Route = createFileRoute("/")({
@@ -216,19 +218,47 @@ function AiRecommendations({ leads }: { leads: Lead[] }) {
   );
 }
 
-function LeadSourcesChart() {
+function LeadSourcesChart({ leads }: { leads: Lead[] }) {
+  const chartData = getLeadSourcesChart(leads);
+
   return (
     <div className="rounded-xl border border-border bg-card p-5 shadow-sm">
       <div>
-        <h2 className="text-base font-semibold text-foreground">Lead Sources</h2>
-        <p className="text-xs text-muted-foreground">Total leads by channel</p>
+        <h2 className="text-base font-semibold text-foreground">
+          Lead Sources
+        </h2>
+        <p className="text-xs text-muted-foreground">
+          Live lead distribution by source
+        </p>
       </div>
+
       <div className="mt-4 h-64">
         <ResponsiveContainer width="100%" height="100%">
-          <BarChart data={leadSourcesChart} margin={{ top: 10, right: 10, left: -16, bottom: 0 }}>
-            <CartesianGrid stroke="var(--border)" strokeDasharray="3 3" vertical={false} />
-            <XAxis dataKey="source" stroke="var(--muted-foreground)" fontSize={11} tickLine={false} axisLine={false} />
-            <YAxis stroke="var(--muted-foreground)" fontSize={12} tickLine={false} axisLine={false} />
+          <BarChart
+            data={chartData}
+            margin={{ top: 10, right: 10, left: -16, bottom: 0 }}
+          >
+            <CartesianGrid
+              stroke="var(--border)"
+              strokeDasharray="3 3"
+              vertical={false}
+            />
+
+            <XAxis
+              dataKey="source"
+              stroke="var(--muted-foreground)"
+              fontSize={11}
+              tickLine={false}
+              axisLine={false}
+            />
+
+            <YAxis
+              stroke="var(--muted-foreground)"
+              fontSize={12}
+              tickLine={false}
+              axisLine={false}
+            />
+
             <Tooltip
               contentStyle={{
                 background: "var(--popover)",
@@ -237,7 +267,12 @@ function LeadSourcesChart() {
                 fontSize: 12,
               }}
             />
-            <Bar dataKey="count" fill="var(--chart-1)" radius={[6, 6, 0, 0]} />
+
+            <Bar
+              dataKey="count"
+              fill="var(--chart-1)"
+              radius={[6, 6, 0, 0]}
+            />
           </BarChart>
         </ResponsiveContainer>
       </div>
@@ -636,6 +671,7 @@ function Dashboard() {
   
   const recent = getRecentLeads(leads);
   const upcoming = getUpcomingFollowUps(leads);
+  const monthlyLeadInflow = getMonthlyLeadInflow(leads);
 
   return (
     <div>
@@ -685,7 +721,7 @@ function Dashboard() {
             <div className="flex items-center justify-between">
               <div>
                 <h2 className="text-base font-semibold text-foreground">Lead inflow</h2>
-                <p className="text-xs text-muted-foreground">Last 6 months · across all sources</p>
+                <p className="text-xs text-muted-foreground">Live CRM data · grouped by month</p>
               </div>
               <div className="flex items-center gap-3 text-xs text-muted-foreground">
                 <span className="inline-flex items-center gap-1.5">
@@ -698,7 +734,7 @@ function Dashboard() {
             </div>
             <div className="mt-4 h-64">
               <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={monthlyPerformance} margin={{ top: 10, right: 10, left: -16, bottom: 0 }}>
+                <AreaChart data={monthlyLeadInflow} margin={{ top: 10, right: 10, left: -16, bottom: 0 }}>
                   <defs>
                     <linearGradient id="gLeads" x1="0" y1="0" x2="0" y2="1">
                       <stop offset="0%" stopColor="var(--chart-1)" stopOpacity={0.35} />
@@ -754,7 +790,7 @@ function Dashboard() {
 
         <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
           <div className="lg:col-span-2">
-            <LeadSourcesChart />
+          <LeadSourcesChart leads={leads} />
           </div>
           <RecentActivityPanel leads={leads} />
         </div>

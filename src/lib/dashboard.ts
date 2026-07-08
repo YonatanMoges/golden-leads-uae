@@ -89,3 +89,53 @@ export function getPipelineValueCards(leads: Lead[]) {
       },
     ];
   }
+
+export function getLeadSourcesChart(leads: Lead[]) {
+  return Object.values(
+    leads.reduce(
+      (acc, lead) => {
+        if (!acc[lead.source]) {
+          acc[lead.source] = {
+            source: lead.source,
+            count: 0,
+          };
+        }
+
+        acc[lead.source].count++;
+
+        return acc;
+      },
+      {} as Record<
+        string,
+        {
+          source: string;
+          count: number;
+        }
+      >,
+    ),
+  );
+}
+
+export function getMonthlyLeadInflow(leads: Lead[]) {
+    const monthMap = new Map<string, { month: string; leads: number; deals: number }>();
+  
+    leads.forEach((lead) => {
+      const date = new Date(lead.createdAt);
+      const month = date.toLocaleString("en-US", { month: "short" });
+  
+      if (!monthMap.has(month)) {
+        monthMap.set(month, { month, leads: 0, deals: 0 });
+      }
+  
+      const entry = monthMap.get(month)!;
+      entry.leads += 1;
+  
+      if (lead.stage === "Closed") {
+        entry.deals += 1;
+      }
+    });
+  
+    return Array.from(monthMap.values());
+  }
+
+  
