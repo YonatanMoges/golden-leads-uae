@@ -2,6 +2,8 @@ import { createFileRoute } from "@tanstack/react-router";
 import { Link } from "@tanstack/react-router";
 import { PageHeader } from "@/components/page-header";
 import { StatusBadge } from "@/components/status-badge";
+import { useState } from "react";
+
 import {
   formatAED,
   monthlyPerformance,
@@ -652,6 +654,7 @@ function LeadSourcePerformance({ leads }: { leads: Lead[] }) {
 }
 
 function Dashboard() {
+  const [isAddLeadOpen, setIsAddLeadOpen] = useState(false);
   const { leads, isLoading, error } = useLeads();
   if (isLoading) {
     return <div className="p-6 text-sm text-muted-foreground">Loading dashboard...</div>;
@@ -683,7 +686,10 @@ function Dashboard() {
             <button className="inline-flex h-9 items-center gap-1.5 rounded-md border border-border bg-background px-3 text-sm font-medium text-foreground hover:bg-accent">
               <Download className="h-4 w-4" /> Export
             </button>
-            <button className="inline-flex h-9 items-center gap-1.5 rounded-md bg-primary px-3 text-sm font-medium text-primary-foreground hover:bg-primary/90">
+            <button
+              onClick={() => setIsAddLeadOpen(true)}
+              className="inline-flex h-9 items-center gap-1.5 rounded-md bg-primary px-3 text-sm font-medium text-primary-foreground hover:bg-primary/90"
+            >
               <Plus className="h-4 w-4" /> New Lead
             </button>
           </>
@@ -837,6 +843,151 @@ function Dashboard() {
           </div>
         </div>
       </div>
+      {isAddLeadOpen && (
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+        <div className="w-full max-w-2xl rounded-xl border border-border bg-card shadow-xl">
+          <div className="flex items-center justify-between border-b border-border px-6 py-4">
+            <div>
+              <h2 className="text-lg font-semibold text-foreground">
+                Add New Lead
+              </h2>
+              <p className="text-sm text-muted-foreground">
+                Enter the buyer inquiry details below.
+              </p>
+            </div>
+
+            <button
+              type="button"
+              onClick={() => setIsAddLeadOpen(false)}
+              className="rounded-md px-3 py-2 text-sm text-muted-foreground hover:bg-muted"
+            >
+              Close
+            </button>
+          </div>
+
+          <form
+            className="grid grid-cols-1 gap-4 p-6 md:grid-cols-2"
+            onSubmit={(event) => {
+              event.preventDefault();
+              console.log("Lead form submitted");
+            }}
+          >
+            <label className="space-y-1">
+              <span className="text-sm font-medium text-foreground">Name</span>
+              <input
+                name="name"
+                required
+                placeholder="Ahmed Al Mansouri"
+                className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm"
+              />
+            </label>
+
+            <label className="space-y-1">
+              <span className="text-sm font-medium text-foreground">Phone</span>
+              <input
+                name="phone"
+                required
+                placeholder="+971 50 123 4567"
+                className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm"
+              />
+            </label>
+
+            <label className="space-y-1">
+              <span className="text-sm font-medium text-foreground">Email</span>
+              <input
+                name="email"
+                type="email"
+                placeholder="ahmed@example.com"
+                className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm"
+              />
+            </label>
+
+            <label className="space-y-1">
+              <span className="text-sm font-medium text-foreground">
+                Property Type
+              </span>
+              <select
+                name="property_type"
+                className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm"
+              >
+                <option>Apartment</option>
+                <option>Villa</option>
+                <option>Townhouse</option>
+                <option>Penthouse</option>
+                <option>Office</option>
+              </select>
+            </label>
+
+            <label className="space-y-1 md:col-span-2">
+              <span className="text-sm font-medium text-foreground">
+                Property Interest
+              </span>
+              <input
+                name="property_interest"
+                placeholder="Dubai Hills Villa"
+                className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm"
+              />
+            </label>
+
+            <label className="space-y-1">
+              <span className="text-sm font-medium text-foreground">
+                Budget (AED)
+              </span>
+              <input
+                name="budget"
+                type="number"
+                min="0"
+                required
+                placeholder="4500000"
+                className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm"
+              />
+            </label>
+
+            <label className="space-y-1">
+              <span className="text-sm font-medium text-foreground">Source</span>
+              <select
+                name="source"
+                className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm"
+              >
+                <option>Manual Entry</option>
+                <option>Website</option>
+                <option>WhatsApp</option>
+                <option>Property Finder</option>
+                <option>Bayut</option>
+                <option>Referral</option>
+              </select>
+            </label>
+
+            <label className="space-y-1 md:col-span-2">
+              <span className="text-sm font-medium text-foreground">Notes</span>
+              <textarea
+                name="notes"
+                rows={4}
+                placeholder="Looking for a three-bedroom villa with a flexible payment plan."
+                className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+              />
+            </label>
+
+            <div className="flex justify-end gap-3 md:col-span-2">
+              <button
+                type="button"
+                onClick={() => setIsAddLeadOpen(false)}
+                className="h-10 rounded-md border border-border px-4 text-sm font-medium text-foreground hover:bg-muted"
+              >
+                Cancel
+              </button>
+
+              <button
+                type="submit"
+                className="h-10 rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground hover:bg-primary/90"
+              >
+                Save Lead
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    )}
     </div>
   );
 }
