@@ -1,3 +1,5 @@
+import { Toaster } from "@/components/ui/sonner";
+
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import {
   Outlet,
@@ -143,7 +145,10 @@ function RootComponent() {
               </div>
             </header>
             <main className="flex-1">
+              <>
               <Outlet />
+              <Toaster position="bottom-right" richColors />
+            </>
             </main>
           </div>
         </div>

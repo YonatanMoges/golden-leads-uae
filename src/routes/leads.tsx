@@ -5,6 +5,7 @@ import { formatAED, pipelineStages, type Lead } from "@/lib/mock-data";
 import { useEffect, useMemo, useState } from "react";
 import { Search, Filter, Download, Plus, Mail, Phone } from "lucide-react";
 import { useLeads } from "@/hooks/useLeads";
+import { AddLeadModal } from "@/components/add-lead-modal";
 
 export const Route = createFileRoute("/leads")({
   head: () => ({
@@ -25,6 +26,7 @@ const BUDGET_RANGES = [
 ];
 
 function LeadsPage() {
+  const [isAddLeadOpen, setIsAddLeadOpen] = useState(false);
   const navigate = useNavigate({ from: "/leads" });
   const [query, setQuery] = useState("");
   const [status, setStatus] = useState<string>("All");
@@ -34,7 +36,7 @@ function LeadsPage() {
   const [source, setSource] = useState<string>("All");
   const [budgetRange, setBudgetRange] = useState<string>("All");
 
-  const { leads, isLoading, error } = useLeads();
+  const { leads, isLoading, error, refetch } = useLeads();
   const agents = useMemo(() => ["All", ...Array.from(new Set(leads.map((l) => l.agent)))], [leads]);
   const propertyTypes = useMemo(
     () => ["All", ...Array.from(new Set(leads.map((l) => l.propertyType)))],
@@ -84,7 +86,10 @@ function LeadsPage() {
             <button className="inline-flex h-9 items-center gap-1.5 rounded-md border border-border bg-background px-3 text-sm font-medium text-foreground hover:bg-accent">
               <Download className="h-4 w-4" /> Export CSV
             </button>
-            <button className="inline-flex h-9 items-center gap-1.5 rounded-md bg-primary px-3 text-sm font-medium text-primary-foreground hover:bg-primary/90">
+            <button
+              onClick={() => setIsAddLeadOpen(true)}
+              className="inline-flex h-9 items-center gap-1.5 rounded-md bg-primary px-3 text-sm font-medium text-primary-foreground hover:bg-primary/90"
+            >
               <Plus className="h-4 w-4" /> Add Lead
             </button>
           </>
@@ -218,7 +223,7 @@ function LeadsPage() {
                       >
                         {l.name}
                       </Link>
-                      <div className="text-xs text-muted-foreground">{l.id} · {l.nationality}</div>
+                      <div className="text-xs text-muted-foreground">{l.nationality}</div>
                     </td>
                     <td className="px-5 py-3">
                       <div className="flex items-center gap-3 text-xs text-muted-foreground">
@@ -249,6 +254,11 @@ function LeadsPage() {
           </div>
         </div>
       </div>
+      <AddLeadModal
+        isOpen={isAddLeadOpen}
+        onClose={() => setIsAddLeadOpen(false)}
+        onLeadCreated={refetch}
+      />
     </div>
   );
 }

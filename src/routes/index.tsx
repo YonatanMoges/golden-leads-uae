@@ -3,6 +3,7 @@ import { Link } from "@tanstack/react-router";
 import { PageHeader } from "@/components/page-header";
 import { StatusBadge } from "@/components/status-badge";
 import { useState } from "react";
+import { AddLeadModal } from "@/components/add-lead-modal";
 
 import {
   formatAED,
@@ -116,8 +117,15 @@ function KpiCard({
 }
 
 function AiRecommendations({ leads }: { leads: Lead[] }) {
+
   const hotNotContacted = leads.filter(
-    (lead) => lead.status === "Hot" && lead.stage === "New Lead"
+    (lead) =>
+      lead.status === "Hot" &&
+      lead.stage === "New Lead",
+  );
+
+  const unassignedLeads = leads.filter(
+    (lead) => !lead.agent || lead.agent === "Unassigned",
   );
   
   const overdueFollowUps = leads.filter((lead) => {
@@ -141,6 +149,21 @@ function AiRecommendations({ leads }: { leads: Lead[] }) {
   );
   
   const items = [
+    {
+      icon: UserPlus,
+      iconBg: "bg-warning/15",
+      iconColor: "text-warning",
+      message: `${unassignedLeads.length} ${
+        unassignedLeads.length === 1 ? "new lead is" : "new leads are"
+      } waiting for assignment.`,
+      priority: unassignedLeads.length > 0 ? "High" : "Low",
+      priorityBg:
+        unassignedLeads.length > 0 ? "bg-hot/10" : "bg-success/10",
+      priorityColor:
+        unassignedLeads.length > 0 ? "text-hot" : "text-success",
+      action: "Assign Leads",
+      href: "/leads" as const,
+    },
     {
       icon: Zap,
       iconBg: "bg-hot/10",
@@ -167,7 +190,11 @@ function AiRecommendations({ leads }: { leads: Lead[] }) {
       icon: CalendarCheck2,
       iconBg: "bg-primary/10",
       iconColor: "text-primary",
-      message: `${viewingsTomorrow.length} property viewing is scheduled for tomorrow.`,
+      message: `${viewingsTomorrow.length} ${
+        viewingsTomorrow.length === 1
+          ? "property viewing is"
+          : "property viewings are"
+      } scheduled for tomorrow.`,
       priority: "Medium",
       priorityBg: "bg-warning/15",
       priorityColor: "text-warning",
@@ -194,7 +221,12 @@ function AiRecommendations({ leads }: { leads: Lead[] }) {
         <p className="text-xs text-muted-foreground">Intelligent next steps based on your pipeline</p>
       </div>
       <div className="mt-4 grid grid-cols-1 gap-3 md:grid-cols-2">
-        {items.map((item, i) => (
+      {items
+        .filter(
+          (item) =>
+            item.action !== "Assign Leads" || unassignedLeads.length > 0,
+        )
+        .map((item, i) => (
           <div key={i} className="flex items-start gap-3 rounded-lg border border-border/60 bg-background p-3">
             <div className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg ${item.iconBg} ${item.iconColor}`}>
               <item.icon className="h-4 w-4" />
@@ -452,7 +484,9 @@ function PipelineValueCards({ leads }: { leads: Lead[] })  {
 
 function AgentPerformancePanel({ leads }: { leads: Lead[] }) {
   const agentStats = Object.values(
-    leads.reduce(
+    leads
+    .filter((lead) => lead.agent && lead.agent !== "Unassigned")
+    .reduce(
       (acc, lead) => {
         if (!acc[lead.agent]) {
           acc[lead.agent] = {
@@ -654,8 +688,9 @@ function LeadSourcePerformance({ leads }: { leads: Lead[] }) {
 }
 
 function Dashboard() {
+  
   const [isAddLeadOpen, setIsAddLeadOpen] = useState(false);
-  const { leads, isLoading, error } = useLeads();
+  const { leads, isLoading, error, refetch } = useLeads();
   if (isLoading) {
     return <div className="p-6 text-sm text-muted-foreground">Loading dashboard...</div>;
   }
@@ -843,151 +878,12 @@ function Dashboard() {
           </div>
         </div>
       </div>
-      {isAddLeadOpen && (
-      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-        <div className="w-full max-w-2xl rounded-xl border border-border bg-card shadow-xl">
-          <div className="flex items-center justify-between border-b border-border px-6 py-4">
-            <div>
-              <h2 className="text-lg font-semibold text-foreground">
-                Add New Lead
-              </h2>
-              <p className="text-sm text-muted-foreground">
-                Enter the buyer inquiry details below.
-              </p>
-            </div>
-
-            <button
-              type="button"
-              onClick={() => setIsAddLeadOpen(false)}
-              className="rounded-md px-3 py-2 text-sm text-muted-foreground hover:bg-muted"
-            >
-              Close
-            </button>
+      <AddLeadModal
+        isOpen={isAddLeadOpen}
+        onClose={() => setIsAddLeadOpen(false)}
+        onLeadCreated={refetch}
+      />
           </div>
-
-          <form
-            className="grid grid-cols-1 gap-4 p-6 md:grid-cols-2"
-            onSubmit={(event) => {
-              event.preventDefault();
-              console.log("Lead form submitted");
-            }}
-          >
-            <label className="space-y-1">
-              <span className="text-sm font-medium text-foreground">Name</span>
-              <input
-                name="name"
-                required
-                placeholder="Ahmed Al Mansouri"
-                className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm"
-              />
-            </label>
-
-            <label className="space-y-1">
-              <span className="text-sm font-medium text-foreground">Phone</span>
-              <input
-                name="phone"
-                required
-                placeholder="+971 50 123 4567"
-                className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm"
-              />
-            </label>
-
-            <label className="space-y-1">
-              <span className="text-sm font-medium text-foreground">Email</span>
-              <input
-                name="email"
-                type="email"
-                placeholder="ahmed@example.com"
-                className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm"
-              />
-            </label>
-
-            <label className="space-y-1">
-              <span className="text-sm font-medium text-foreground">
-                Property Type
-              </span>
-              <select
-                name="property_type"
-                className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm"
-              >
-                <option>Apartment</option>
-                <option>Villa</option>
-                <option>Townhouse</option>
-                <option>Penthouse</option>
-                <option>Office</option>
-              </select>
-            </label>
-
-            <label className="space-y-1 md:col-span-2">
-              <span className="text-sm font-medium text-foreground">
-                Property Interest
-              </span>
-              <input
-                name="property_interest"
-                placeholder="Dubai Hills Villa"
-                className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm"
-              />
-            </label>
-
-            <label className="space-y-1">
-              <span className="text-sm font-medium text-foreground">
-                Budget (AED)
-              </span>
-              <input
-                name="budget"
-                type="number"
-                min="0"
-                required
-                placeholder="4500000"
-                className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm"
-              />
-            </label>
-
-            <label className="space-y-1">
-              <span className="text-sm font-medium text-foreground">Source</span>
-              <select
-                name="source"
-                className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm"
-              >
-                <option>Manual Entry</option>
-                <option>Website</option>
-                <option>WhatsApp</option>
-                <option>Property Finder</option>
-                <option>Bayut</option>
-                <option>Referral</option>
-              </select>
-            </label>
-
-            <label className="space-y-1 md:col-span-2">
-              <span className="text-sm font-medium text-foreground">Notes</span>
-              <textarea
-                name="notes"
-                rows={4}
-                placeholder="Looking for a three-bedroom villa with a flexible payment plan."
-                className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
-              />
-            </label>
-
-            <div className="flex justify-end gap-3 md:col-span-2">
-              <button
-                type="button"
-                onClick={() => setIsAddLeadOpen(false)}
-                className="h-10 rounded-md border border-border px-4 text-sm font-medium text-foreground hover:bg-muted"
-              >
-                Cancel
-              </button>
-
-              <button
-                type="submit"
-                className="h-10 rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground hover:bg-primary/90"
-              >
-                Save Lead
-              </button>
-            </div>
-          </form>
-        </div>
-      </div>
-    )}
-    </div>
+          
   );
 }
