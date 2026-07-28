@@ -44,21 +44,15 @@ The demo shows:
 - n8n workflow execution
 - Gmail notification delivery
 
-> **Demo video:** Add the public video link here after uploading it.  
-> Example: `[Watch the full demo](YOUR_VIDEO_URL)`
+## Demo
 
-<!--
-Optional alternative:
-Upload a compressed demo file to docs/demo/ and replace the line above with:
+🎥 **Watch the full demo**
 
-[Watch the demo](docs/demo/golden-leads-demo.mp4)
--->
+[Golden Leads UAE Demo](docs/demo/golden-leads-demo.mp4)
 
 ---
 
 ## Screenshots
-
-Add the final screenshots to `docs/screenshots/` and keep the filenames used below.
 
 ### Dashboard
 
@@ -85,6 +79,12 @@ Add the final screenshots to `docs/screenshots/` and keep the filenames used bel
 ![Add lead form](docs/screenshots/add-lead.png)
 
 ---
+
+## Case Study
+
+Read the full project case study:
+
+[Download the Golden Leads UAE Case Study](docs/case-study/golden-leads-uae-case-study.pdf)
 
 ## Core Features
 
@@ -178,7 +178,7 @@ Captures a new inquiry and starts the automation workflow without requiring dire
 
 ## Automation Workflow
 
-The production workflow is hosted on **n8n Cloud**.
+The production workflow is orchestrated using on **n8n Cloud**.
 
 It performs the following operations:
 
@@ -242,7 +242,7 @@ npm run build
 
 ---
 
-## Suggested Repository Structure
+## Repository Structure
 
 ```text
 golden-leads-uae/
@@ -293,23 +293,31 @@ The solution is designed to:
 
 ## Future Improvements
 
-- In-app lead editing
-- Stage changes directly from the pipeline
-- Agent reassignment
-- Lead notes and activity history
-- Authentication and role-based access
-- WhatsApp notifications and messaging
-- Calendar integration
-- Duplicate-lead detection
+- Authentication & role-based access
+
+- Lead editing
+
+- Pipeline drag-and-drop
+
+- Lead notes & activity history
+
+- Duplicate detection
+
 - Advanced lead scoring
-- Automated follow-up sequences
-- Additional reporting and conversion metrics
+
+- WhatsApp integration
+
+- Calendar integration
+
+- Automated follow-up campaigns
+
+- Reporting improvements
 
 ---
 
 ## Project Context
 
-This project was developed as a practical portfolio system for real-estate lead operations in the UAE. It demonstrates frontend development, database integration, workflow automation, cloud deployment, and business-process design in one end-to-end application.
+This project was developed as a end-to-end portfolio project for real-estate lead operations in the UAE. It demonstrates frontend development, database integration, workflow automation, cloud deployment, and business-process design in one end-to-end application.
 
 ---
 
@@ -320,6 +328,7 @@ This project was developed as a practical portfolio system for real-estate lead 
 - GitHub: [@YonatanMoges](https://github.com/YonatanMoges)
 - Project repository: [golden-leads-uae](https://github.com/YonatanMoges/golden-leads-uae)
 - Live application: [Golden Leads UAE](https://golden-leads-uae.netlify.app)
+⭐ End-to-end CRM + Automation Portfolio Project
 
 ---
 
