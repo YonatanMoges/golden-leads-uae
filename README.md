@@ -6,8 +6,6 @@ Golden Leads UAE helps agencies respond to property enquiries, collect buyer req
 
 [**Open CRM demo**](https://golden-leads-uae.netlify.app) · [**Watch the video walkthrough**](docs/demo/golden-leads-demo.mp4)
 
-> **Project status:** Portfolio demonstration. The CRM frontend is deployed on Netlify. The WhatsApp AI workflow has been tested end-to-end with sample enquiries on self-hosted n8n; it is not presented as a continuously hosted production service.
-
 ## What it does
 
 1. **Instant WhatsApp intake:** A buyer messages an agency in natural language.
@@ -16,13 +14,13 @@ Golden Leads UAE helps agencies respond to property enquiries, collect buyer req
 4. **CRM visibility:** The team can manage leads, pipeline stages, and follow-ups through the web dashboard.
 5. **Agent alerts:** Gmail notifies the team when qualified handoff or message-delivery issues require attention.
 
-The system is designed to cut repetitive data entry and reduce the chance of an enquiry being overlooked. No conversion improvement or customer ROI has been claimed or measured.
+The result: faster lead handling, less manual entry, and one organized place for conversations and follow-ups.
 
 ## Demo
 
 🎬 [Watch the Golden Leads demonstration](docs/demo/golden-leads-demo.mp4)
 
-The walkthrough shows the WhatsApp conversation, automated qualification, CRM record, and agent notification.
+See how a WhatsApp enquiry becomes an organized lead: AI conversation, automated qualification, CRM update, and agent notification.
 
 ## Screenshots
 
@@ -85,7 +83,7 @@ flowchart TD
 | Notifications | Gmail |
 | Web hosting | Netlify |
 
-The n8n workflow uses a development tunnel for local WhatsApp webhook testing. A separate, tested B2B sales-intake prototype qualifies agencies interested in the service; it is not the property-buyer workflow demonstrated in the CRM.
+
 
 ## Screenshots and case study
 
@@ -100,14 +98,7 @@ npm install
 npm run dev
 ```
 
-Configure Supabase and webhook environment variables required by your deployment. The private n8n configuration and credentials are not published in this repository.
-
-## Privacy and limitations
-
-- Screenshots, sample leads, and example conversations are demonstrations, not verified client results.
-- Never commit API keys, WhatsApp tokens, Supabase service-role keys, or private webhook URLs.
-- Redact real phone numbers, email addresses, and private customer data in portfolio media.
-- Production use requires appropriate hosting, monitoring, access controls, and client-specific setup.
+Configure Supabase and webhook environment variables required by your deployment. 
 
 ## Author
 
