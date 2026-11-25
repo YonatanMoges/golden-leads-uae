@@ -18,6 +18,10 @@ The result: faster lead handling, less manual entry, and one organized place for
 
 ## Demo
 
+![Golden Leads UAE — WhatsApp AI lead qualification and CRM walkthrough](docs/demo/1121%284%29.gif)
+
+**From WhatsApp enquiry to qualified lead — automatically.**
+
 🎬 [Watch the Golden Leads demonstration](docs/demo/golden-leads-demo.mp4)
 
 See how a WhatsApp enquiry becomes an organized lead: AI conversation, automated qualification, CRM update, and agent notification.
