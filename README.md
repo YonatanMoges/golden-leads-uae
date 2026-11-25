@@ -1,56 +1,28 @@
 # Golden Leads UAE
 
-An automated real-estate lead management system built to help agencies capture inquiries, organize prospects, track pipeline activity, schedule follow-ups, and notify sales teams without relying on disconnected spreadsheets or repetitive manual entry.
+**AI-powered WhatsApp lead qualification and CRM for real estate agencies.**
 
-[![Live Demo](https://img.shields.io/badge/Live_Demo-Open_App-00C7B7?style=for-the-badge&logo=netlify&logoColor=white)](https://golden-leads-uae.netlify.app)
-[![React](https://img.shields.io/badge/React-CRM-61DAFB?style=for-the-badge&logo=react&logoColor=black)](#technology-stack)
-[![n8n](https://img.shields.io/badge/n8n-Automation-EA4B71?style=for-the-badge&logo=n8n&logoColor=white)](#system-architecture)
-[![Supabase](https://img.shields.io/badge/Supabase-Database-3FCF8E?style=for-the-badge&logo=supabase&logoColor=white)](#technology-stack)
+Golden Leads UAE helps agencies respond to property enquiries, collect buyer requirements, organize prospects in one place, and notify agents when a human follow-up is needed.
 
-> **Project status:** Deployed and operational  
-> **Live application:** [golden-leads-uae.netlify.app](https://golden-leads-uae.netlify.app)
+[**Open CRM demo**](https://golden-leads-uae.netlify.app) · [**Watch the video walkthrough**](docs/demo/golden-leads-demo.mp4)
 
----
+> **Project status:** Portfolio demonstration. The CRM frontend is deployed on Netlify. The WhatsApp AI workflow has been tested end-to-end with sample enquiries on self-hosted n8n; it is not presented as a continuously hosted production service.
 
-## Overview
+## What it does
 
-Golden Leads UAE is a portfolio project demonstrating how a real-estate agency can connect a polished CRM interface to a cloud-based automation workflow.
+1. **Instant WhatsApp intake:** A buyer messages an agency in natural language.
+2. **AI qualification:** The assistant responds and collects known requirements such as location, budget, property type, bedrooms, and timeline.
+3. **Lead tracking:** Supabase stores prospect details and conversation history.
+4. **CRM visibility:** The team can manage leads, pipeline stages, and follow-ups through the web dashboard.
+5. **Agent alerts:** Gmail notifies the team when qualified handoff or message-delivery issues require attention.
 
-When a user submits a buyer inquiry through the CRM:
-
-1. The form sends the inquiry to an n8n Cloud webhook.
-2. The workflow validates and processes the submitted data.
-3. The lead is stored in Supabase.
-4. The sales team receives an email notification through Gmail.
-5. The CRM reflects the new lead across its dashboard, lead database, pipeline, and follow-up views.
-
-The result is a centralized lead-operations system that reduces manual data entry and helps sales teams respond to new opportunities more consistently.
-
----
+The system is designed to cut repetitive data entry and reduce the chance of an enquiry being overlooked. No conversion improvement or customer ROI has been claimed or measured.
 
 ## Demo
 
-### Video walkthrough
+🎬 [Watch the Golden Leads demonstration](docs/demo/golden-leads-demo.mp4)
 
-The demo shows:
-
-- Dashboard and business overview
-- Lead database
-- Sales pipeline
-- Follow-up management
-- Analytics
-- New lead submission
-- Automatic updates across the CRM
-- n8n workflow execution
-- Gmail notification delivery
-
-## Demo
-
-🎥 **Watch the full demo**
-
-[Golden Leads UAE Demo](docs/demo/golden-leads-demo.mp4)
-
----
+The walkthrough shows the WhatsApp conversation, automated qualification, CRM record, and agent notification.
 
 ## Screenshots
 
@@ -80,258 +52,63 @@ The demo shows:
 
 ---
 
-## Case Study
-
-Read the full project case study:
-
-[Download the Golden Leads UAE Case Study](docs/case-study/golden-leads-uae-case-study.pdf)
-
-## Core Features
-
-- Centralized real-estate lead database
-- Dashboard with lead and pipeline summaries
-- Lead stages from new inquiry to closing
-- Visual sales pipeline
-- Follow-up tracking
-- Lead-source analytics
-- Agent assignment
-- Buyer contact and property-requirement capture
-- Automated lead validation and processing
-- Supabase database integration
-- Automatic email notifications
-- Cloud-hosted n8n workflow
-- Responsive web interface
-- Production deployment through Netlify
-
----
-
-## System Architecture
+## How it works
 
 ```mermaid
 flowchart TD
-    A[User submits a lead] --> B[React CRM on Netlify]
-    B --> C[n8n Cloud webhook]
-    C --> D[Validate and process lead]
-    D --> E[Store lead in Supabase]
-    D --> F[Send Gmail notification]
-    E --> G[CRM dashboard and views update]
+  A["Buyer sends WhatsApp enquiry"] --> B["Meta WhatsApp Cloud API"]
+  B --> C["n8n + AI qualification"]
+  C --> D["Supabase lead and conversation"]
+  D --> E["Golden Leads CRM"]
+  C --> F["WhatsApp response"]
+  C --> G["Gmail agent alert"]
 ```
 
-### Data flow
+## Features
 
-```text
-User
-  ↓
-Golden Leads UAE CRM
-  ↓
-n8n Cloud Webhook
-  ├──→ Supabase Database
-  └──→ Gmail Notification
-  ↓
-Updated Dashboard, Leads, Pipeline and Follow-ups
-```
+- AI-assisted, multi-turn WhatsApp lead qualification
+- Real-estate requirement extraction and conversation history
+- Lead database, sales pipeline, follow-up views, and agent assignment
+- CRM dashboard and lead-source analytics
+- Agent Gmail notifications and error alerts
+- Responsive browser-based frontend
 
----
+## Technology
 
-## Technology Stack
+| Component | Stack |
+|---|---|
+| CRM frontend | React, TypeScript, TanStack Start |
+| Database | Supabase |
+| Workflow | Self-hosted n8n (Docker) |
+| Messaging | Meta WhatsApp Cloud API |
+| AI inference | Groq-hosted language model |
+| Notifications | Gmail |
+| Web hosting | Netlify |
 
-| Layer | Technology | Purpose |
-|---|---|---|
-| Frontend | React | CRM user interface |
-| Application framework | TanStack Start | Application structure and routing |
-| Language | TypeScript | Typed application development |
-| Database | Supabase | Lead storage and retrieval |
-| Automation | n8n Cloud | Workflow orchestration |
-| Notifications | Gmail | New-lead email alerts |
-| Hosting | Netlify | Production deployment |
-| Version control | GitHub | Source-code management |
+The n8n workflow uses a development tunnel for local WhatsApp webhook testing. A separate, tested B2B sales-intake prototype qualifies agencies interested in the service; it is not the property-buyer workflow demonstrated in the CRM.
 
----
+## Screenshots and case study
 
-## Application Sections
+For a larger view, open any screenshot above. See the [project case study](docs/case-study/golden-leads-uae-case-study.pdf).
 
-### Dashboard
-
-Provides a high-level overview of lead activity, pipeline distribution, agent performance, lead sources, and recent records.
-
-### Leads
-
-Stores prospect contact details, property interests, budgets, source information, assigned agents, and current stages.
-
-### Pipeline
-
-Displays opportunities according to their position in the sales process, making it easier to see where each buyer currently stands.
-
-### Follow-ups
-
-Surfaces leads that require future contact and helps reduce missed sales opportunities.
-
-### Analytics
-
-Summarizes lead sources, pipeline activity, conversion information, and overall CRM performance.
-
-### Add Lead
-
-Captures a new inquiry and starts the automation workflow without requiring direct access to the database or a spreadsheet.
-
----
-
-## Automation Workflow
-
-The production workflow is orchestrated using on **n8n Cloud**.
-
-It performs the following operations:
-
-1. Receives lead data from the CRM webhook request.
-2. Validates and normalizes the submitted fields.
-3. Applies the lead-processing and assignment logic.
-4. Creates the new record in Supabase.
-5. Sends an email notification to the sales team.
-6. Returns a successful response to the CRM.
-
-The production workflow export is not included in this repository. This prevents deployment-specific configuration, webhook details, account identifiers, and credentials from being exposed publicly.
-
-A sanitized workflow export may be added later for technical demonstration.
-
----
-
-## Local Development
-
-### Prerequisites
-
-Install the following before running the project:
-
-- Node.js 18 or later
-- npm
-- A Supabase project
-- An n8n Cloud account or self-hosted n8n instance
-
-### Installation
+## Run the CRM locally
 
 ```bash
 git clone https://github.com/YonatanMoges/golden-leads-uae.git
 cd golden-leads-uae
 npm install
-```
-
-### Environment variables
-
-Create a `.env.local` file in the project root.
-
-```env
-VITE_SUPABASE_URL=your_supabase_project_url
-VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
-VITE_N8N_WEBHOOK_URL=your_n8n_webhook_url
-```
-
-> Confirm the exact environment-variable names used in the source code before deployment. Never commit real credentials or private webhook URLs.
-
-### Start the development server
-
-```bash
 npm run dev
 ```
 
-Open the local URL shown in the terminal.
+Configure Supabase and webhook environment variables required by your deployment. The private n8n configuration and credentials are not published in this repository.
 
-### Production build
+## Privacy and limitations
 
-```bash
-npm run build
-```
-
----
-
-## Repository Structure
-
-```text
-golden-leads-uae/
-├── docs/
-│   ├── screenshots/
-│   │   ├── dashboard.png
-│   │   ├── leads.png
-│   │   ├── pipeline.png
-│   │   ├── follow-ups.png
-│   │   ├── analytics.png
-│   │   └── add-lead.png
-│   └── demo/
-├── public/
-├── src/
-├── .env.example
-├── .gitignore
-├── package.json
-└── README.md
-```
-
----
-
-## Security Notes
-
-- Secrets and API keys must remain in environment variables.
-- Supabase service-role keys must never be exposed in frontend code.
-- Production webhook URLs should not be published unnecessarily.
-- Screenshots and videos should hide private email addresses, credentials, database identifiers, and webhook URLs.
-- Any future workflow export should be sanitized before it is committed.
-
----
-
-## Business Value
-
-Golden Leads UAE demonstrates how an agency can replace a fragmented lead-handling process with one connected system.
-
-The solution is designed to:
-
-- Reduce repetitive manual entry
-- Centralize buyer information
-- Improve visibility across the sales pipeline
-- Support faster responses to new inquiries
-- Reduce forgotten follow-ups
-- Give teams a clearer view of lead sources and performance
-- Connect the customer-facing interface to back-office automation
-
----
-
-## Future Improvements
-
-- Authentication & role-based access
-
-- Lead editing
-
-- Pipeline drag-and-drop
-
-- Lead notes & activity history
-
-- Duplicate detection
-
-- Advanced lead scoring
-
-- WhatsApp integration
-
-- Calendar integration
-
-- Automated follow-up campaigns
-
-- Reporting improvements
-
----
-
-## Project Context
-
-This project was developed as a end-to-end portfolio project for real-estate lead operations in the UAE. It demonstrates frontend development, database integration, workflow automation, cloud deployment, and business-process design in one end-to-end application.
-
----
+- Screenshots, sample leads, and example conversations are demonstrations, not verified client results.
+- Never commit API keys, WhatsApp tokens, Supabase service-role keys, or private webhook URLs.
+- Redact real phone numbers, email addresses, and private customer data in portfolio media.
+- Production use requires appropriate hosting, monitoring, access controls, and client-specific setup.
 
 ## Author
 
-**Yonatan Moges**
-
-- GitHub: [@YonatanMoges](https://github.com/YonatanMoges)
-- Project repository: [golden-leads-uae](https://github.com/YonatanMoges/golden-leads-uae)
-- Live application: [Golden Leads UAE](https://golden-leads-uae.netlify.app)
-⭐ End-to-end CRM + Automation Portfolio Project
-
----
-
-## Disclaimer
-
-Golden Leads UAE is a portfolio demonstration project. The sample names, contact details, properties, budgets, and performance data shown in the application are fictional and are used only to demonstrate the CRM workflow.
+**Yonatan Moges** · [GitHub](https://github.com/YonatanMoges) · [Live CRM](https://golden-leads-uae.netlify.app)
